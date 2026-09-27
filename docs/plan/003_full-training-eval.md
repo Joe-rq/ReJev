@@ -1,0 +1,110 @@
+# 003 · 全量训练与 holdout 全集评测（第一阶段验收轮）· v2 修订版
+
+日期：2026-09-24。状态：**待项目所有者终审**。
+v1 经双谱系独立评审（codex/GPT 系 ＋ MiniMax-M3）修订；修订对照见文末。
+
+## 本轮回答的问题
+
+> 同一配方在全量数据（35,948 条）上训练后，微调模型在**封存 holdout 全集**（1,892 条）上，
+> 与**底座模型同协议对照**：完全匹配准确率、无效输出率各是多少（约束/无约束双口径分开记）？
+
+**执行顺序（评审后新增，先锚定再训练）**：
+
+```
+① base 全集评测（~$0.3，拿锚定值）→ ② 按预注册分段阈值确认本轮可判定
+→ ③ 全量训练（~$3.9）→ ④ dev sanity gate（~$0.05，不过不碰 holdout）
+→ ⑤ adapter 全集评测（~$0.6）→ ⑥ 汇总与 exp002 归档
+```
+
+不与 tev1 的 88% 横比（底座、切分、集合都不同）；可比的只有本项目内 base vs 微调。
+
+## ① base 前置评测（新增）
+
+训练前先对 `rejev-holdout` 全集跑 **base 模型**双口径评测（~22min，~$0.3）。目的：拿 base 锚定值，按**预注册的分段阈值**（见验收）确认本轮判据可判定——若 base≥60%，+15pp 增益型判据在本轮就不可满足，**训练与否由项目所有者在此关口决定**，不是训练完才发现。
+
+## 训练（`src/train/full_train.py`，复用 exp001 已验证骨架）
+
+| 项 | 值 | 依据 |
+|---|---|---|
+| 数据 | `rejev-train` 全量 35,948 条；开跑前本地统计 **train 自去重率**（statehash 组内重复）记入 manifest | 评审 2.7 |
+| 配方 | 与 exp001 逐字相同（r16/α32/d0.05/all-linear · 1 epoch · bs 2×2 · lr 2e-4 · cosine · warmup 0.03 · seq 2048 · `assistant_only_loss` · seed 42）。单 epoch 决策本身记入 manifest | 单变量；评审 3.5 |
+| GPU/超时 | L4 ×1 · timeout 21600s；每 200 步打印 ETA | 评审 1.3 |
+| checkpoint | `save_steps=1000` · `save_total_limit=2` · 存 Volume `/checkpoints/`；**内容清单记 manifest：adapter＋optimizer＋scheduler＋RNG**（TRL `resume_from_checkpoint` 全量恢复） | 评审 1.4/1.13 |
+| 恢复 | 训练失败→从最新 checkpoint 续训 1 次；**二次失败→全流程停止归档**（abort 阶梯，见预算） | 评审 0.3 |
+| 收尾原子化 | final adapter 拷 `/artifacts/full-v1` → **验 SHA256** → 才清 `/checkpoints/`；全程脚本化无手操 | 评审 1.13 |
+| 产物 | adapter＋SHA256＋manifest（code sha / 依赖 lock / 数据 revision / 配置 / checkpoint 清单） | 评审 1.11 |
+
+## 评测（`src/train/eval_holdout.py`，独立函数）
+
+- **对象与顺序**：`rejev-holdout` 1,892 条全集；**base 先、adapter 后**（base 预测 jsonl 落 Volume 后才开 adapter——时序可审计，评审 1.6）。
+- **启动断言（三道，fail 即拒跑）**：① 重跑 statehash/group 双口径泄漏校验（holdout vs train，~10s）② holdout prompt token 长度 p50/p95/p99 统计且 **p99 < 1024** ③ base 与 adapter 的 prompt token ID 哈希一致（同输入铁证）。
+- **约束口径＝状态机**（评审 P0 修正）：`prefix_allowed_tokens_fn` 按步分阶段——未生成字母时只允许 A–X 的 24 个 token id；已生成一个字母后**只允许 EOS 集 [130073, 1]**。开跑前用 5 条固定样例断言实际生成 token 序列恰为「字母＋EOS」；未观察到字母即出 EOS / 字母后再出字母，均按 invalid 计。
+- **无约束口径**：自由生成；解析与 `src/align` 严格口径同源——**strip 后恰为一个允许字母**（大小写敏感；特殊 token 先剥）。
+- 生成参数：greedy、`max_new_tokens=8`、显式 `eos_token_id=[1,130073]`、`pad_token_id=1`、关思考模板（exp001 已实证 5/5 干净输出「字母＋`<|im_end|>`」；base 全集无约束有效率将给出全集级证据）。
+- **dev sanity gate（新增，评审 1.9）**：碰 holdout 前，base＋adapter 各在 dev 抽 200 条跑无约束有效率（~12min，~$0.05）——fine-tune 反不如 base 或 invalid 异常即 **abort，不碰 holdout**（dev 只诊断不调参，不违反纪律）。
+- **stuck detection**：连续 10 分钟零写入自杀（评审 3.3）。
+- **报告**：完全匹配准确率（**分母恒为 1,892，invalid 一律计错**）＋无效率（双口径×双模型＝4 组）· 按 source 分组（**仅 n≥50 的源单列，其余并入 other**）· 逐题 jsonl（schema：`{id, source, prompt_tokens, prompt_sha256, generated_token_ids, generated_text, valid, pred, gold, mode, model, adapter_sha256}`）· 逐题一致性四象限（都对/都错/base对它错/base错它对）。
+
+## 预算与 abort 阶梯（评审 0.3 修正）
+
+| 阶段 | 预期 | 说明 |
+|---|---|---|
+| ① base 评测 | $0.3 | 22min |
+| ③ 训练 | $3.9 | 4.8h 外推＋冷启动/模型加载计入 |
+| ④ dev sanity | $0.05 | |
+| ⑤ adapter 评测 | $0.6 | |
+| **预期路径合计** | **≈$5.5** | |
+| 一次完整重启余量 | +$4.0 | 训练失败恢复 1 次的预算 |
+| 杂项缓冲 | +$0.5 | Volume I/O、排队 |
+| **本轮硬上限** | **$12** | **每阶段启动前核对 `modal billing` 已耗额，达 $12 即全停**（人工确认点） |
+
+总闸不变：spend limit $0（零自付的唯一保证——**评审建议改 $10 安全阀，已拒绝**：那会打开自付通道）。训练不自动重试；评测分批可停、从断点续。
+
+## 验收判据（**预注册分段阈值，待你终审**）
+
+训练 loss：**末 50 步滑动均值 < 0.6** ＋ 曲线归档（数字判据，替代「明显低于 exp001」）。
+
+准确率（约束口径，分母 1,892，invalid 计错）——**分段规则在 base 评测揭晓时按段选用，段界预先写死，不看结果改阈值**：
+
+| base 实测 | 本轮判据 |
+|---|---|
+| base < 30% | 微调 ≥50% 且增益 ≥15pp（学没学会） |
+| 30% ≤ base < 60% | 微调 ≥70% 且增益 ≥15pp |
+| base ≥ 60% | 微调 ≥ base−2pp（不显著退化）且无约束有效率 ≥85%；增益如实报告不设硬门槛 |
+
+辅助判据：微调无约束有效率 ≥85%（各段同查）；「base 与微调都错」比例 >25% 时标记「holdout 存在系统性难关」（诊断项，不阻断）。统计显著性：主比较＝约束口径总体准确率的 McNemar 检验（p<0.05，诊断性报告）。
+
+达标 → 第一阶段 Choice 验收通过。不达标 → 见下方封存纪律。
+
+## holdout 封存纪律（评审 P0 修正，三层强制）
+
+1. **语义**：holdout 的「一次使用」＝本轮验收的二元判定＋总体数字归档。**逐题错误信息不得用于设计下一轮训练/调参**；若违反，该 holdout 视为已烧掉，须另建新最终评测集。
+2. **实现**：`eval_holdout.py` 启动即重跑泄漏校验并写入 manifest；任何重跑重算校验值，对不上即标记 unsealed rerun。
+3. **时序**：base 先 adapter 后；dev sanity 在前、holdout 在后。
+
+## 明确不做
+
+不调参、不动 holdout、dev 只诊断不调参、不发布模型与数据、不与 tev1 横比、不加采样温度对照（评审建议，已拒：超出本轮问题）。
+
+---
+
+## 评审修订对照（v1→v2）
+
+| 来源 | 问题 | 处置 |
+|---|---|---|
+| codex P0-1 ＋ MiniMax 0.1 | 约束解码每步回调、需状态机 | **采纳**：分阶段状态机＋5 条固定样例预断言 |
+| codex P0-2 ＋ MiniMax 0.4 | holdout 用于下轮决策破坏封存；脚本层无强制 | **采纳**：三层强制（语义/启动断言/时序） |
+| codex P0-3 ＋ MiniMax 0.3 | $8 无硬保护、重启击穿 | **采纳（改造）**：abort 阶梯＋$12 硬上限＋阶段前账单核对；**拒绝** spend limit 改 $10（破坏零自付） |
+| MiniMax 0.2 | 阈值无 base 锚定，base≥60% 时判据不可满足 | **采纳**：base 前置评测＋预注册分段阈值 |
+| MiniMax 1.9 | dev 集闲置 | **采纳**：dev sanity gate（诊断不调参） |
+| MiniMax 1.6 | 评测顺序 | **采纳**：base 先 adapter 后 |
+| codex P1-4 | 口径分母/解析未定死 | **采纳**：分母 1,892、invalid 计错、解析定义引 src/align |
+| codex P1-6 ＋ MiniMax 1.2 | loss「明显低于」不可判 | **采纳**：末 50 步滑动均值 <0.6 |
+| codex P1-7 ＋ MiniMax 1.4/1.13 | 恢复路径/checkpoint 内容 | **采纳**：内容清单＋SHA256 原子收尾 |
+| codex P1-8 ＋ MiniMax 1.10/2.3 | 归档 schema 不足 | **采纳**：逐题 jsonl schema 定死、开跑前建 exp002 schema |
+| MiniMax 1.5/3.3 | prompt 长度假设/stuck | **采纳**：p99<1024 断言＋10min 零写入自杀 |
+| MiniMax 1.7/2.6 | 关思考是否听话 | **已有证据**（exp001 5/5 干净）＋base 全集无约束有效率将实证 |
+| MiniMax 2.7 | train 自去重 | **采纳**：开跑前本地统计入 manifest |
+| MiniMax 2.8 | 主比较预设 | **采纳**：McNemar 诊断性检验 |
+| MiniMax 3.4 | tev1 口径换算 | **拒绝**：意向书禁止横比，换算增误导面 |
+| MiniMax 2.2 | 温度采样对照 | **拒绝**：超出本轮问题 |

@@ -1,0 +1,63 @@
+{
+  "_description": "本项目实际使用的上游来源锁定表。datasets 与 tev1 上游（commit 1dde778）的 sources.lock.json 一致——这些是 <state, question, options> records 的来源。tokenizer 一节说明本项目实际使用的 tokenizer：tev1 上游的数据构建管线用 Qwen tokenizer 预渲染，而本项目不沿用其渲染结果，改用自己的 render.py 以 MiniCPM5-2B 重新渲染（故两个 tokenizer 都需要锁定）。",
+  "datasets": {
+    "mnli": {
+      "repo": "nyu-mll/multi_nli",
+      "revision": "da70db2af9d09693783c3320c4249840212ee221",
+      "config": null,
+      "license_metadata": [
+        "cc-by-3.0",
+        "cc-by-sa-3.0",
+        "mit",
+        "other"
+      ],
+      "url": "https://huggingface.co/datasets/nyu-mll/multi_nli"
+    },
+    "boolq": {
+      "repo": "google/boolq",
+      "revision": "35b264d03638db9f4ce671b711558bf7ff0f80d5",
+      "config": null,
+      "license_metadata": [
+        "cc-by-sa-3.0"
+      ],
+      "url": "https://huggingface.co/datasets/google/boolq"
+    },
+    "banking77": {
+      "repo": "legacy-datasets/banking77",
+      "revision": "f54121560de48f2852f90be299010d1d6dc612ec",
+      "config": null,
+      "license_metadata": [
+        "cc-by-4.0"
+      ],
+      "url": "https://huggingface.co/datasets/legacy-datasets/banking77"
+    },
+    "ag_news": {
+      "repo": "fancyzhx/ag_news",
+      "revision": "eb185aade064a813bc0b7f42de02595523103ca4",
+      "config": null,
+      "license_metadata": [
+        "unknown"
+      ],
+      "_license_note": "这里的 unknown 是上游 HF 元数据字段的实况（未填）；但该项目页明示 research / non-commercial。以 NOTICE 的表述为准，勿据本字段判断可商用。",
+      "url": "https://huggingface.co/datasets/fancyzhx/ag_news"
+    },
+    "sst5": {
+      "repo": "SetFit/sst5",
+      "revision": "e51bdcd8cd3a30da231967c1a249ba59361279a3",
+      "config": null,
+      "license_metadata": "unspecified",
+      "_license_note": "上游无任何许可声明——既未授权也未禁止。使用及衍生发布前须自行确认。",
+      "url": "https://huggingface.co/datasets/SetFit/sst5"
+    }
+  },
+  "tokenizer": {
+    "repo": "openbmb/MiniCPM5-2B",
+    "revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+    "note": "本仓渲染层使用（src/data/render.py 的 MODEL/REV 与此处必须一致）"
+  },
+  "upstream_tokenizer": {
+    "repo": "Qwen/Qwen3.5-2B",
+    "revision": "15852e8c16360a2fea060d615a32b45270f8a8fc",
+    "note": "tev1 上游数据构建管线使用；本仓只沿用其产出的 records 语义层，不沿用其预渲染文本"
+  }
+}

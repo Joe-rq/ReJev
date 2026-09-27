@@ -1,0 +1,64 @@
+{
+  "mode": "constrained",
+  "n": 1892,
+  "base_acc": 0.5111,
+  "adapter_acc": 0.805,
+  "delta_pp": 29.39,
+  "quadrants": {
+    "both_right": 852,
+    "both_wrong": 254,
+    "base_only": 115,
+    "adapter_only": 671
+  },
+  "mcnemar": {
+    "chi2": 391.89,
+    "p_exact": 2.940542125979947e-96
+  },
+  "per_source": {
+    "ag_news": {
+      "n": 75,
+      "base_ok": 56,
+      "adapter_ok": 63
+    },
+    "banking77": {
+      "n": 150,
+      "base_ok": 110,
+      "adapter_ok": 136
+    },
+    "boolq": {
+      "n": 150,
+      "base_ok": 121,
+      "adapter_ok": 125
+    },
+    "mnli": {
+      "n": 250,
+      "base_ok": 119,
+      "adapter_ok": 201
+    },
+    "policy": {
+      "n": 75,
+      "base_ok": 34,
+      "adapter_ok": 73
+    },
+    "policy_v2": {
+      "n": 600,
+      "base_ok": 244,
+      "adapter_ok": 461
+    },
+    "research_taxonomy_v21": {
+      "n": 192,
+      "base_ok": 163,
+      "adapter_ok": 192
+    },
+    "routing_v2": {
+      "n": 300,
+      "base_ok": 81,
+      "adapter_ok": 216
+    },
+    "sst5": {
+      "n": 100,
+      "base_ok": 39,
+      "adapter_ok": 56
+    }
+  }
+}

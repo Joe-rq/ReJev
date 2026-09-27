@@ -1,0 +1,59 @@
+# 本仓库不含数据。下列路径是复现时在本地生成的——一律不入库。
+#
+# 写法说明：一律用 `/<name>`（前导斜杠锚定根、**不带尾斜杠**）。带尾斜杠的目录规则
+# 在 git 语义下只匹配目录，匹配不到符号链接——实测中曾因此把指向绝对路径的软链
+# 提交进仓库。不带尾斜杠则目录与软链一并覆盖。
+
+# 数据、产物、运行记录
+/data
+/artifacts
+/runs
+
+# 密钥与凭据（永不入库）
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+credentials
+credentials.json
+.aws/
+.gcp/
+.kube/config
+.ssh/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# 模型与数据集缓存（HF 下载物）
+.cache
+/hf-cache
+
+# 大件
+*.zip
+*.tar
+*.gz
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# 日志（可能含运行路径与中间输出）
+*.log
+logs/
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

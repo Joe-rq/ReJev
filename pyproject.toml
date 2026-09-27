@@ -1,0 +1,12 @@
+[project]
+name = "rejev"
+version = "0.1.0"
+description = "ReJev: Jev-inspired decision-model experiments on MiniCPM5-2B (stage 1: single-letter Choice classification)"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+align = [
+    "transformers==5.6.2",
+    "jinja2>=3.1",
+]
