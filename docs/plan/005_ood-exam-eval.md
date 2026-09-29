@@ -4,9 +4,18 @@ number: "005"
 date: 2026-09-25
 title: OOD 客卷评测：第三方客卷 2,087 题的分布外对照
 tags: [evaluation, ood, reproduction, exp005]
-status: draft
-related: [plan/003_full-training-eval, plan/004_weakness-probe, experiments/exp004-jev-comparison]
+status: executed
+related: [plan/003_full-training-eval, plan/004_weakness-probe]
 ---
+
+> **发布说明（2026-09-28 追加，正文一字未改）**：本文件是**训前锁定**的预注册记录。
+> **补充**：本文的 `file.py:NN` 行号是**写作当时**的锚点，代码此后已变——定位请按**符号名**。
+> 判据 A–D 的**字面**一字未动，但判据 A/C 的**因果读法**已在
+> [exp007 的偏离登记](../experiments/exp007-ood-exam/implementation-notes.md) 中就地收窄：
+> 「同向塌陷」只排除「2B 太小」，**不构成**「塌陷是这套配方的产物」的归因（本卷缺
+> 「未微调的 4B」对照臂）。引用本文件时请与该登记合读。
+> **（2026-09-29 补）** frontmatter 的 `status` 已由 `draft` 改登记为 `executed`
+> ——属元数据订正，正文一字未改；执行结果见 [exp007 记录](../experiments/exp007-ood-exam/README.md)。
 
 # 005 · OOD 客卷评测方案
 
@@ -22,7 +31,7 @@ related: [plan/003_full-training-eval, plan/004_weakness-probe, experiments/exp0
 | exp003 | tev1 官方 dev 集 1,300 | tev1 分布内 | Tev1-4B |
 | exp004 | 自建 holdout 1,892 | tev1 分布内 | ReJev（Jev 客场） |
 
-因此 `95.3%`（ReJev-2B vs 官方 4B 公开成绩）与「ReJev-2B ≈ 真 Jev」两个读数**都无法区分「学会了决策」与「学会了这个数据分布的规则」**。exp004 已把这条写进效度边界，但没补上。
+因此 `95.2%`（ReJev-2B 相对**官方公布**的 4B 成绩，按公开值算得：86.46% ÷ 90.8%）与「ReJev-2B 在本卷上未检出与真 Jev 的差异」两个读数**都无法区分「学会了决策」与「学会了这个数据分布的规则」**。exp004 已把这条写进效度边界，但没补上。
 
 上游 tev1 仓库内保存着一份**第三方**构造的客卷（anisselbd / themsquared / WallerChen 三家），连同双模型重跑结果。**在这张卷子上三方都是客场**——这是本仓现有材料里唯一能回答「出了分布还剩多少」的东西。
 
@@ -84,12 +93,12 @@ related: [plan/003_full-training-eval, plan/004_weakness-probe, experiments/exp0
 
 ### `src/` 下没有 recall / FPR / 混淆实现
 
-全仓唯一的实现是上游的 `resources/tev1/evaluation/public-third-party/analyze.py:24-27`，但它：① 分母 `/1000` 写死；② 只认第三方 schema；③ 断言 `len(rr)==2087`。**不可直接复用，须自写分析器**（可抄其逻辑 + issue-2 worktree `jev_compare.py:52-59` 的 `wilson()`、`:69-78` 的 `mcnemar_exact()`）。
+全仓唯一的实现是上游的 `resources/tev1/evaluation/public-third-party/analyze.py:24-27`，但它：① 分母 `/1000` 写死；② 只认第三方 schema；③ 断言 `len(rr)==2087`。**不可直接复用，须自写分析器**（可抄其逻辑 + `src/train/jev_compare.py` 里的 `wilson()` 与 `mcnemar_exact()`）。
 
 ### 无 `group_id` 的连带效应
 
 本卷没有分组键，因此：
-- **聚类 bootstrap 不可用**（实现只在 `.claude/worktrees/issue-2/src/train/jev_compare.py`，且三重锁死只能吃 holdout）→ 主口径退回 **Wilson 区间 + 逐题 McNemar**，并在报告中显式声明假设
+- **聚类 bootstrap 不可用**（实现只在 `src/train/jev_compare.py`，且该脚本按封存 sha 锁死、只能吃 holdout）→ 主口径退回 **Wilson 区间 + 逐题 McNemar**，并在报告中显式声明假设
 - `render.py:112` 的 `groups` 统计会塌成 1，写进 manifest 时会被误读——须在 prep 里显式记 `"groups": null`
 - 泄漏校验**去掉 `(source, group_id)` 口径**（会退化成单键、等于没查），只留 `statehash` + `id`
 
@@ -106,7 +115,7 @@ related: [plan/003_full-training-eval, plan/004_weakness-probe, experiments/exp0
 | 1 | **checkpoint 一致性核查**：比对上游 README 的 `hassan/Qwen3.5-4B-v1-new-69617472-bdc3c2fc` 与本仓 `togethercomputer/Tev1-4B-experimental` @ `0b7becf` | 一句结论 | config/权重指纹相符或不符；不符则报告措辞改为「同门 4B」 |
 | 2 | **零泄漏复核**：本卷 2,087 条 × `data/rejev/records/rejev-{train,holdout,dev}.jsonl` ＋ `data/paper/tev1-paper.jsonl` | 复核记录 | `statehash` / `id` 双口径全 0 命中 |
 | 3 | **新写 `src/train/prep_exam.py`**（以 `prep_paper.py` 为骨架） | `data/exam/exam.jsonl` + `exam-manifest.json` | ① `answer = {o.key: o.label}[gold]` 映射后 `render.build_messages` 零抛错；② `source := suite`；③ 带 `n_options`；④ 2,087 条齐全；⑤ 长度断言通过 |
-| 4 | **改 `eval_cross.py:63-68`**：`PAPERS` 加 `"exam": {"path": "/vol/data/exam.jsonl", "n": 2087}` | 一行 diff | `--n 5` sanity 跑通 |
+| 4 | **改 `eval_cross.py` 的 `PAPERS` 常量**（按符号名定位）：加 `"exam": {"path": "/vol/data/exam.jsonl", "n": 2087}` | 一行 diff | `--n 5` sanity 跑通 |
 | 5 | **上传**：`modal volume put rejev data/exam/exam.jsonl /data/exam.jsonl` | Volume 文件 | `modal volume ls rejev /data` 可见 |
 | 6 | **触发四次评测**（`modal deploy` + `.spawn()`，理由见 [REPRODUCING.md](../../REPRODUCING.md) 第 4 节）：`base` / `adapter` / `adapter_r64` / `tev1` | `/vol/eval/cross-{model}-exam.jsonl` + meta + summary | 四个 jsonl 各 2,087 条；meta 的 `paper_sha256` 与本卷一致 |
 | 7 | **新写 `src/train/exam_report.py`**：recall / FPR / 混淆矩阵 / 分 suite 表 / Wilson / McNemar | `exam-report.json` + md | 与上游 `analyze.py` 在 qwen/jev 两个现成产物上**对得上**（用它们的输出做自检） |
@@ -178,5 +187,5 @@ ReJev-2B 与 Tev1-4B 的 recall 若**同向塌陷**，结论从「我们的 2B �
 
 - 追踪 Issue：#5（内部追踪项）；发布侧：#6（内部追踪项）
 - 上游材料：`resources/tev1/evaluation/public-third-party/`（只读）
-- 前序：[003 全量训练与验收](003_full-training-eval.md) · [004 弱项探针](004_weakness-probe.md) · `docs/experiments/exp003-three-way/` · `docs/experiments/exp004-jev-comparison/`
+- 前序：[003 全量训练与验收](003_full-training-eval.md) · [004 弱项探针](004_weakness-probe.md) · `docs/experiments/exp003-three-way/`（真 Jev 对照 exp005 未随本仓发布）
 - 复用的现成实现：`src/train/eval_cross.py`（模型与考卷注册、按题约束、看门狗、断点续跑）· `src/train/prep_paper.py`（prep 骨架）· `src/train/compare.py`（四象限 + McNemar，可原样吃新卷）

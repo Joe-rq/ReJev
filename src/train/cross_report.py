@@ -30,16 +30,25 @@ OFFICIAL = {
     "policy_transfer": {"correct": 300, "n": 300, "label": "迁移 300"},
 }
 MODEL_LABEL = {"base": "MiniCPM5-2B base", "adapter": "ReJev-2B（全量训练 r16）",
-               "tev1": "Tev1-4B（官方权重）", "adapter_r64": "ReJev-2B（r64 探针）"}
+               "tev1": "Tev1-4B（官方权重）", "adapter_r64": "ReJev-2B（r64 探针）",
+               "clean_r16": "ReJev-2B（006 剔源 r16·已发布）"}
 # 每张考卷期望的模型集：缺任一方即拒绝出表（exp003 的 P0-c 要求）。
-# 004 容量探针在 holdout2 上不与 tev1 同台（该集只用于「rank 16 vs 64」的单变量对比）。
+# 004 容量探针在 holdout2 上不与 tev1 同台（该集只用于 rank 16 vs 64 的对比；
+# 注意该对比**不是单变量**——两臂的训练切分与评测集也不同，2026-09-28 更正）。
 MODELS_BY_PAPER = {
     "tev1paper": ("base", "adapter", "tev1"),
     "holdout": ("base", "adapter", "tev1"),
     "holdout2": ("base", "adapter", "adapter_r64"),
+    # 007 OOD 客卷：五臂。plan/005 原写四臂，**加 clean_r16 是刻意的偏离**——
+    # plan 写于 2026-09-25，当时 006 的干净权重轮尚未训练；而 clean_r16 才是
+    # 已发布到 HF/魔搭的模型，报告缺了它给出的就不是已发布模型的 OOD 表现。
+    # adapter_r64 已知在 holdout2 上崩坏（004）——本卷上它回答「OOD 是否同样崩」，
+    # 属 #15 的线索，不参与主判据。
+    "exam": ("base", "adapter", "clean_r16", "adapter_r64", "tev1"),
 }
 EXPECTED_N = {"tev1paper": 1300, "holdout": 1892,
-              "holdout2": 1802}   # 封存条数（holdout2 为 004 新切分）
+              "holdout2": 1802,   # 封存条数（holdout2 为 004 新切分）
+              "exam": 2087}       # 007 OOD 客卷（第三方 2,087 题）
 REQUIRED_FIELDS = {"id", "source", "gold", "pred_constrained", "pred_unconstrained"}
 
 

@@ -1,7 +1,10 @@
 """004 弱项探针：容量探针训练（LoRA r=16 → r=64）。
 
-**单一变量**：仅 LoRA rank 与 alpha 变化（r16/a32 → r64/a128），其余配方与 exp002
-逐字相同（lr 2e-4、1 epoch、seq 2048、d0.05、all-linear、seed 42、L4、MiniCPM5-2B @ 12a3808）。
+**各项配置**：LoRA rank 与 alpha 为 r64/a128；其余训练超参与 exp002 相同
+（lr 2e-4、1 epoch、seq 2048、d0.05、all-linear、seed 42、L4、MiniCPM5-2B @ 12a3808）。
+⚠️ **但本探针不是「只换 rank」的单变量对照**——训练集也不是 exp002 那一份：它取自
+rejev2-train 另切 5% 新封存集后的剩余部分（见下行），而评测集同样换了。
+故 exp004 的读数**不作 rank 归因**（2026-09-28 更正，见 docs/plan/004 的偏离记录）。
 
 **数据**：`/vol/data/train-probe.jsonl`（rejev2-train，34,146 条）——从原 train 另切 5%
 新封存集后的剩余部分；原 holdout 已降级为开发集（见 docs/plan/004_weakness-probe.md）。
@@ -99,7 +102,7 @@ def train(code_commit: str = "unknown") -> dict:
             and tok.decode([ids[sup[-1]]]) == IM_END, f"监督span异常: sup={sup}"
     print(f"[precheck] 远程断言 3/3 通过 · 训练集 {len(rows)} 条", flush=True)
 
-    # ── 3. LoRA 与训练配置（与 exp001 逐字相同）──
+    # ── 3. LoRA 与训练配置（超参面板沿用 exp001；rank/alpha 非单变量对照，见文件头）──
     model = get_peft_model(model, LoraConfig(
         r=64, lora_alpha=128, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
@@ -178,7 +181,8 @@ def train(code_commit: str = "unknown") -> dict:
             files[name] = hashlib.sha256(open(p, "rb").read()).hexdigest()
     manifest = {
         "run": "rejev-probe-r64", "date": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "plan": "docs/plan/004_weakness-probe.md（容量探针：仅 rank 16→64 为变量）",
+        "plan": "docs/plan/004_weakness-probe.md（容量探针：rank 16→64 与切分/评测集共变，"
+                "**非单变量对照**——本轮读数不作 rank 归因）",
         "code_commit": code_commit, "model": MODEL, "revision": REV,
         "data": {"train": "train-probe.jsonl (rejev2-train，004 新切分)", "n": len(rows)},
         "config": {"lora": "r64 a128 d0.05 all-linear", "epochs": 1, "bs": "2x2",

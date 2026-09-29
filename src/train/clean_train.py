@@ -1,8 +1,13 @@
 """006 干净权重轮训练（Issue #8）：Modal · L4 · 30,987 条 · 剔 ag_news/sst5。
 
-**单一变量 = 训练集**（rejev2-train 剔源 3,159 条）。配方与 004 探针（`probe_train.py`）
-逐字相同，含 LoRA rank —— 这是为了让 `clean-r*` 与 `probe-r*` 构成**纯剔源消融**
-（同源同切分，唯一差异是那 3,159 条）。理由见 docs/plan/006_clean-weights.md。
+**设计意图 = 训练集为单一变量**（rejev2-train 剔源 3,159 条）：配方与 004 探针
+（`probe_train.py`）相同，保留 `--rank` 是为了让**同 rank** 的 `clean-r*` 与 `probe-r*`
+构成**纯剔源消融**（同源同切分，唯一差异是那 3,159 条）。理由见 docs/plan/006_clean-weights.md。
+
+⚠️ **2026-09-28 更正：该纯消融本轮并未实现。** 探针只跑过 **r64**，而本轮训前把 rank
+改回 r16/α32（004 判 r64 崩坏），故 `clean-r16` 与 `probe-r64` **不同 rank**，不构成纯
+消融。exp006 实际使用的主对照是 `clean-r16` vs `exp002-r16`，**剔源与切分两项共变**，
+差值不作归因（见 exp006 README 与报告 §2.3）。恢复纯消融需补 `probe-r16`。
 
 **数据**：`/vol/data/train-clean.jsonl`（30,987 条，由 `src/train/prep_clean.py` 产出）。
 **产物**：`/vol/artifacts/clean-r{rank}`；checkpoint `/vol/checkpoints-clean-r{rank}`
@@ -81,7 +86,7 @@ def train(rank: int = 64, alpha: int = 128, code_commit: str = "unknown") -> dic
 
     assert (rank, alpha) == (LOCKED_RANK, LOCKED_ALPHA), (
         f"plan 006 训前锁定 r{LOCKED_RANK}/a{LOCKED_ALPHA}，收到 r{rank}/a{alpha}——"
-        f"改 rank 会让 clean 与 probe 的对比不再是纯剔源消融（消融前提：配方逐字相同）")
+        f"改 rank 会让 clean 与**同 rank** 的 probe 不再构成纯剔源消融（该消融要求配方逐字相同）")
 
     os.environ.setdefault("WANDB_PROJECT", "rejev")
 

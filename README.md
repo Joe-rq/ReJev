@@ -22,7 +22,12 @@ behavior *without* autoregressive free-form generation.
 
 **51.11% baseline → 80.50% ReJev-2B** on a sealed holdout (1,892 items / 924 groups)
 
-`+29.39pp · 0% invalid output · $5.31 training cost`
+`+29.39pp · 0% invalid output · $5.31 cumulative app billing`
+
+> On cost: the `$5.31` figure is the **cumulative** billing of the `rejev` Modal app
+> (it includes all earlier mis-run overhead for that app); it is *not* the cost of this
+> training run alone. Cost conventions differ across rounds — they are not comparable
+> or additive (technical report §1.3).
 
 The goal is not to claim equivalence with Jev, but to understand and reproduce the
 mechanics of lightweight decision models through controlled experiments.
@@ -43,18 +48,26 @@ mechanics of lightweight decision models through controlled experiments.
 - We do not claim equivalence with the official Jev model, nor that we reproduced Tev1-4B.
 - We do not extrapolate the numbers above to out-of-distribution capability — the
   current evidence covers this exam and its kin, nothing wider.
-- We do not claim the −2.33pp cost of removing restricted sources is attributable to a
-  single variable (two factors co-vary in that run).
+- We do not claim the cost of removing restricted sources is attributable to a single
+  variable (two factors co-vary in that run). ⚠️ The `−2.33pp` figure this line used to
+  cite is **void (corrected 2026-09-28)** — it was measured on a contaminated split; the
+  corrected reading on the clean holdout is **+0.63pp** (CI [−1.13, +2.37]). See the
+  technical report §2.3.
 
 Every experiment record carries a *validity boundaries* section stating what was
 measured and what cannot be read from it.
 
 > ⚠️ **Scope**: this repository ships the **bulk** of the experiment records, not all
-> of them. Two gaps, different in kind — ① `exp005` (the four-way comparison against
-> the real Jev) is **not included**: its conclusions rest on measured numbers for a
-> third-party checkpoint (Tev1-4B) whose license is undecided; ② the **upstream
-> data-build pipeline is not included**: it is tev1's MIT code and must be obtained
-> separately (see [REPRODUCING.md](REPRODUCING.md) §2).
+> of them. **Three paths are excluded in full** — ① `exp005` (the four-way comparison
+> against the real Jev): its conclusions rest on measured numbers for a third-party
+> checkpoint (Tev1-4B) whose license is undecided; ② `plan/007` and `008` (the
+> weight-release plans): their text *is* "which internal files were checked for what",
+> so redacting them leaves a hollow shell; ③ `src/publish/` (the weight-release
+> toolchain): it ships via the HF/ModelScope channel, depends on files that are not
+> part of this export (the model card among them), and its unit-test fixtures contain
+> **literal** malformed-credential patterns that redaction would break.
+> Separately, the **upstream data-build pipeline is not included**: it is tev1's MIT
+> code and must be obtained separately (see [REPRODUCING.md](REPRODUCING.md) §2).
 
 ## Layout
 

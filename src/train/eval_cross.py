@@ -54,6 +54,11 @@ MODELS = {
     "adapter_r64": {"repo": "openbmb/MiniCPM5-2B",
                     "rev": "12a3808a956f869c767195e9266b59c4d21d92e2",
                     "family": "minicpm", "adapter": "/vol/artifacts/probe-r64"},
+    # 006 干净权重轮：剔源重训的 r16（**已发布到 HF/魔搭的就是它**，见 plan/007/008）。
+    # plan/005 写四臂时它还不存在——OOD 读数若缺这一臂，报告给出的就不是**已发布模型**的表现。
+    "clean_r16": {"repo": "openbmb/MiniCPM5-2B",
+                  "rev": "12a3808a956f869c767195e9266b59c4d21d92e2",
+                  "family": "minicpm", "adapter": "/vol/artifacts/clean-r16"},
 }
 
 # 显式常量，绝不用 tok.eos_token（MiniCPM 上是 </s>，Qwen 上是 <|im_end|>）
@@ -65,9 +70,14 @@ PAPERS = {
     "holdout": {"path": "/vol/data/holdout-eval.jsonl", "n": 1892},
     # 004 新封存集（原 holdout 已降级为开发集）
     "holdout2": {"path": "/vol/data/holdout2-eval.jsonl", "n": 1802},
+    # 007 OOD 客卷：第三方三家构造的 2,087 题（plan/005；对本仓训练分布外）
+    "exam": {"path": "/vol/data/exam.jsonl", "n": 2087},
 }
 
-app = modal.App("rejev-eval-cross")
+app = modal.App("rejev-eval-cross-v2")
+# ⚠️ 版本后缀是**规避 Modal 部署缓存**（教训来自内部权重发布脚本，不随本发布集分发）：实测同名的
+# app 在代码改动后仍可能跑旧版。**改了本文件就 +1**，并把触发脚本的 from_name 同步改名。
+# v2：MODELS 增 clean_r16（006 已发布模型）——plan/005 的四臂里没有它。
 
 # 依赖钉版本：环境指纹须可复现（同代码+同权重重跑应得同结果）
 image = (

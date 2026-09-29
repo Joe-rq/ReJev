@@ -1,6 +1,7 @@
 """ReJev 003 全量训练（v2 方案，已批准）：Modal · L4 · 35,948 条 · ≤6h。
 
-与 exp001 逐字相同的配方（单变量）；新增：checkpoint 续训（Volume 持久化）、
+与 exp001 逐字相同的配方（**注意：不是单变量对照**——训练集从 500 条 smoke 换到全量
+35,948 条，正是本轮的自变量）；新增：checkpoint 续训（Volume 持久化）、
 ETA 打点、原子收尾（adapter→SHA256→清 checkpoint）、wandb 全程、代码版本随行。
 可证伪问题：全量训练后微调模型在封存 holdout 上的准确率与无效率（对照 base 51.1%）。
 
@@ -96,7 +97,7 @@ def train(code_commit: str = "unknown") -> dict:
             and tok.decode([ids[sup[-1]]]) == IM_END, f"监督span异常: sup={sup}"
     print(f"[precheck] 远程断言 3/3 通过 · 训练集 {len(rows)} 条", flush=True)
 
-    # ── 3. LoRA 与训练配置（与 exp001 逐字相同）──
+    # ── 3. LoRA 与训练配置（超参面板沿用 exp001；本轮的对照口径见文件头）──
     model = get_peft_model(model, LoraConfig(
         r=16, lora_alpha=32, lora_dropout=0.05, bias="none", task_type="CAUSAL_LM",
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",

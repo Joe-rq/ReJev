@@ -13,7 +13,7 @@
 | 高于 base | ≥15pp | base 51.11% → **+29.39pp** | ✅ |
 | 微调（无约束）有效率 | ≥85% | **100%** | ✅ |
 | 训练末段 loss | 滑均 <0.6 | 末段日志 0.22–0.31，最终 train_loss **0.4569** | ✅ |
-| 账单 | ≤$12 | **$5.31**（rejev 累计，含全部探错） | ✅ |
+| 账单 | ≤\$12 | **\$5.31**（rejev 累计，含全部探错） | ✅ |
 
 分段规则：base 实测 51.11% 落「30–60%」段 → 判据为该段规则；段界训前写死。
 
@@ -54,6 +54,26 @@
 
 观察：① 约束/无约束逐位相同——base 与微调的无约束输出有效率均 100%（干净单字母），**约束器从未触发**，是纯保险；② 最弱残留：sst5 56.0%（5 分类情感、训练样本仅 2,000）、routing_v2 72.0%（24 选项、base 仅 27%）；③ 已近饱和：boolq、ag_news、research_taxonomy（100%）。
 
+### 报告 §2.1 引用的补充读数（口径登记）
+
+技术报告 §2.1 除上表两行外还引了两组数字，均在**本记录之外**计算，登记于此以备追溯：
+
+| 读数 | 值 | 产出 |
+|---|---|---|
+| 聚类 bootstrap 95%（base） | [48.53, 53.93] | `src/train/jev_compare.py` |
+| 聚类 bootstrap 95%（adapter） | [78.44, 82.54] | 同上 |
+| 逐题随机猜（mean 1/n） | 27.66% | `src/train/noskill_baseline.py` |
+| 恒定输出最常见字母 | 27.91% | 同上 |
+| 恒定输出最常见语义 key | 17.18% | 同上 |
+| 按选项数取该组最常见位置 | 29.86% | 同上 |
+
+区间口径：**按 `group_id` 整组重抽**（本卷 924 组），主表 2,000 次、分表 1,000 次、
+`seed=20260925`——参数写死在 `jev_compare.py` 的 `bootstrap` 记录里。后三个基线是
+**在同一批标签上取众数**得出的**事后描述上界**（非无技能基线），报告 §2.1 已带此限定。
+
+⚠️ **两者的输入都不随本仓发布**（bootstrap 读逐题结果，基线读封存留出集），故第三方
+**无法直接复算**这两个块，只能按脚本内写死的口径自行重建输入。
+
 ## 执行偏离（按 board 纪律记录）
 
 1. **p99 断言线 1024→1900**：holdout prompt 实测 p99=1480（任务分布本身，与训练 max 1526 同源），非异常；评测预算按实测重估。
@@ -70,6 +90,11 @@ modal run src/train/eval_holdout.py --model-kind adapter --split dev    # sanity
 modal run src/train/eval_holdout.py --model-kind adapter --split holdout
 uv run python src/train/compare.py <base.jsonl> <adapter.jsonl> --mode constrained
 ```
+
+⚠️ 上面的 `modal run` 是**本轮当时的跑法**，如实保留。但本仓此后的纪律是
+**`modal deploy` + `.spawn()`**：`modal run` 会把本地进程绑在远程任务上，本地被终止时
+Modal 会向远程发 cancellation 把任务杀掉（实测发生过）。全量训练与评测属长任务，请照
+[REPRODUCING.md](../../../REPRODUCING.md) 的触发脚本方式跑。
 
 ## 结论与下一步
 

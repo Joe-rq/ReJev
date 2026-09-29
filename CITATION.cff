@@ -6,14 +6,19 @@ abstract: >-
   training pipeline on MiniCPM5-2B (stage 1: single-letter Choice classification).
   Includes the rendering/splitting half of the data pipeline, LoRA training and
   constrained-decoding evaluation code, the sealed holdout discipline, and the
-  experiment records (exp005 — the four-way comparison involving third-party
-  weights — is not included; the upstream data-build pipeline is not included
-  either). Not affiliated with TypeSafe or with the tev1 project.
+  experiment records (three paths are excluded in full: the exp005 record — the
+  four-way comparison involving third-party weights; plans 007/008 — the
+  weight-release plans; and the weight-release toolchain under src/publish/
+  (it ships via the HF/ModelScope channel and depends on files not part of
+  this export; its unit-test fixtures contain literal
+  malformed-credential patterns). The upstream data-build
+  pipeline is not included either). Not affiliated with TypeSafe or with the
+  tev1 project.
 authors:
   - alias: "Joe-rq"
     # 如需真实姓名与 ORCID，在此补充后即可被学术索引正确归属。
 version: "0.1.0"
-# date-released: 首次公开发布时填写（本文件在发布准备阶段写成，此时尚未公开）
+# date-released: 待本版本（含技术报告）公开时填写；本仓首次公开发布为 2026-09-27（不含技术报告）。
 license: MIT
 repository-code: "https://github.com/Joe-rq/ReJev"
 keywords:
