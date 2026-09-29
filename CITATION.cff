@@ -26,6 +26,17 @@ date-released: "2026-09-29"
 license: MIT
 type: software
 repository-code: "https://github.com/Joe-rq/ReJev"
+# DOI 回填（2026-09-29，Zenodo 记录 23036903）：doi 字段放 concept DOI——它对所有版本
+# 稳定、总是指向最新版，GitHub 引用面板与第三方引用工具读的是它；version DOI 列在
+# identifiers 里，标识 v1.0.0 这一份冻结快照。
+doi: 10.5281/zenodo.23036350
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.23036350
+    description: "Concept DOI — resolves to the latest version"
+  - type: doi
+    value: 10.5281/zenodo.23036903
+    description: "Version DOI — v1.0.0 snapshot"
 keywords:
   - decision model
   - LoRA
