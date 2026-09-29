@@ -14,13 +14,17 @@ abstract: >-
   malformed-credential patterns). The upstream data-build
   pipeline is not included either). Not affiliated with TypeSafe or with the
   tev1 project.
+# 作者字段说明：alias 供 GitHub 引用面板显示；family-names 供 Zenodo 提取作者名
+# （Zenodo 的作者解析器读 name / family-names / given-names，不读 alias——只写 alias 会得到空名）。
+# 如需真实姓名与 ORCID，在此补充后即可被学术索引正确归属。
 authors:
-  - alias: "Joe-rq"
-    # 如需真实姓名与 ORCID，在此补充后即可被学术索引正确归属。
-version: "0.1.0"
-# date-released: 本版本（含技术报告）随 2026-09-29 的 GitHub 发布公开；本仓首次公开发布为 2026-09-27（不含技术报告）。
+  - family-names: "Joe-rq"
+    alias: "Joe-rq"
+version: "v1.0.0"
+# date-released: v1.0.0（首个正式 Release，含技术报告）于 2026-09-29 发布；本仓首次代码公开发布为 2026-09-27（无 Release、不含技术报告）。
 date-released: "2026-09-29"
 license: MIT
+type: software
 repository-code: "https://github.com/Joe-rq/ReJev"
 keywords:
   - decision model
