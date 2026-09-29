@@ -2,7 +2,7 @@
 
 **Reproducible post-training of a lightweight decision model**
 
-[中文版](README.zh-CN.md)
+[中文版](README.zh-CN.md) · [Technical report](docs/report/technical-report.md)
 
 An independent reproduction of a Jev-style decision-model training pipeline on top of
 MiniCPM5-2B, exploring whether a small model can learn stable structured decision
@@ -27,7 +27,7 @@ behavior *without* autoregressive free-form generation.
 > On cost: the `$5.31` figure is the **cumulative** billing of the `rejev` Modal app
 > (it includes all earlier mis-run overhead for that app); it is *not* the cost of this
 > training run alone. Cost conventions differ across rounds — they are not comparable
-> or additive (technical report §1.3).
+> or additive ([technical report](docs/report/technical-report.md) §1.3).
 
 The goal is not to claim equivalence with Jev, but to understand and reproduce the
 mechanics of lightweight decision models through controlled experiments.
@@ -52,7 +52,7 @@ mechanics of lightweight decision models through controlled experiments.
   variable (two factors co-vary in that run). ⚠️ The `−2.33pp` figure this line used to
   cite is **void (corrected 2026-09-28)** — it was measured on a contaminated split; the
   corrected reading on the clean holdout is **+0.63pp** (CI [−1.13, +2.37]). See the
-  technical report §2.3.
+  [technical report](docs/report/technical-report.md) §2.3.
 
 Every experiment record carries a *validity boundaries* section stating what was
 measured and what cannot be read from it.

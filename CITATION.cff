@@ -18,7 +18,8 @@ authors:
   - alias: "Joe-rq"
     # 如需真实姓名与 ORCID，在此补充后即可被学术索引正确归属。
 version: "0.1.0"
-# date-released: 待本版本（含技术报告）公开时填写；本仓首次公开发布为 2026-09-27（不含技术报告）。
+# date-released: 本版本（含技术报告）随 2026-09-29 的 GitHub 发布公开；本仓首次公开发布为 2026-09-27（不含技术报告）。
+date-released: "2026-09-29"
 license: MIT
 repository-code: "https://github.com/Joe-rq/ReJev"
 keywords:
