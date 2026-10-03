@@ -115,6 +115,18 @@ ALLOW: list[tuple[str, str, str]] = [
         "docs/finetune/trl.md",
         "上游 MiniCPM 官方仓库的文档路径，不是本仓路径（同 plan/002 那条的类别）",
     ),
+    # 2026-10-03（#65 批次 ④ 顺手登记，#57 引入时漏登记）：报告 §1.3「训练输入 → SFT
+    # 输入」一步写明的模板出处——同「上游路径」类别（非本仓路径）
+    (
+        "docs/report/technical-report.md",
+        "docs/finetune/trl.md",
+        "上游 MiniCPM 官方仓库的文档路径，不是本仓路径（§1.3 训练模板的出处）",
+    ),
+    (
+        "docs/report/technical-report.zh-CN.md",
+        "docs/finetune/trl.md",
+        "同上（中文版）",
+    ),
     # 范围注里**指名排除项**：路径不在发布集属有意为之（README/报告两版的 scope 注）
     ("README.md", "src/publish/", "范围注：说明该目录被整目录排除"),
     ("README.zh-CN.md", "src/publish/", "范围注：说明该目录被整目录排除"),

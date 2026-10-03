@@ -20,9 +20,9 @@ abstract: >-
 authors:
   - family-names: "Joe-rq"
     alias: "Joe-rq"
-version: "v1.0.0"
-# date-released: v1.0.0（首个正式 Release，含技术报告）于 2026-09-29 发布；本仓首次代码公开发布为 2026-09-27（无 Release、不含技术报告）。
-date-released: "2026-09-29"
+version: "v1.0.1"
+# date-released: v1.0.1（报告第三批修正后的重导版本）于 2026-10-03 发布；v1.0.0（首个正式 Release，含技术报告）于 2026-09-29 发布；本仓首次代码公开发布为 2026-09-27（无 Release、不含技术报告）。
+date-released: "2026-10-03"
 license: MIT
 type: software
 repository-code: "https://github.com/Joe-rq/ReJev"

@@ -1,6 +1,6 @@
 [project]
 name = "rejev"
-version = "1.0.0"
+version = "1.0.1"
 description = "ReJev: Jev-inspired decision-model experiments on MiniCPM5-2B (stage 1: single-letter Choice classification)"
 requires-python = ">=3.12"
 dependencies = []

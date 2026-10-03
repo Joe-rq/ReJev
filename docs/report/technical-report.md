@@ -1,17 +1,21 @@
 # ReJev Technical Report
 
-**Reproducing a tev1-style decision-model training pipeline on MiniCPM5-2B**
+**Lightweight decision-model post-training on MiniCPM5-2B: an independent reproduction of a Jev-style pipeline**
 
-Version 1.0 · released 2026-09-28, corrected 2026-09-29 · [中文版](technical-report.zh-CN.md)
+Version 1.0.1 · released 2026-09-28, corrected 2026-10-02 · [中文版](technical-report.zh-CN.md)
 
 ---
 
 ## Abstract
 
-This report documents an **independent reproduction**: porting a tev1-style
+This report documents an **independent reproduction**: porting a Jev-style
 "structured decision" training pipeline onto MiniCPM5-2B (2B), and answering two
 falsifiable questions — **is the reconstruction faithful**, and **what was and was
 not obtained**.
+
+**tev1** here means Together's public Jev-style recipe — the repository
+accompanying *How to train your own Jev for \$17*. This report reproduces its
+**pipeline**, **not** TypeSafe's Jev product.
 
 **Main result**: on a self-built, sealed holdout (1,892 items / 924 groups), the
 untuned base model scores **51.11%** and the tuned model **80.50%**
@@ -21,7 +25,8 @@ constrained and unconstrained decoding.
 **Reconstruction fidelity**: against the **upstream published** Tev1-4B figures
 (**880/1000 + 300/300**, published via the Together API), our local readings are
 identical **bit-for-bit (0.00pp)**; our renderer reproduces 1,300 upstream prompts
-**verbatim**. The evaluation harness is thereby independently validated.
+**verbatim**. The evaluation harness is thereby cross-checked against upstream's
+published figures.
 
 **This report also records three negative results**, which matter as much as the
 main one:
@@ -104,7 +109,11 @@ the training runs in §1.3.
 
 ### 1.3 Training recipe
 
-Base model `MiniCPM5-2B` (Apache-2.0, revision pinned). LoRA SFT, with the
+Base model `MiniCPM5-2B` (Apache-2.0, revision pinned). Training inputs are exported as
+`sft` messages by `src/data/render.py`; each run then formats them with a training-specific
+chat template (`TRAIN_TEMPLATE`, rebuilt from the official MiniCPM `docs/finetune/trl.md`
+structure), not the model's own. We do not use the Tev1-4B tokenizer to prepare training data.
+LoRA SFT, with the
 hyperparameters **identical to the character** across runs **except for rank**
 (exp004 uses r64/α128, see §2.4):
 
@@ -200,14 +209,15 @@ thing. We answer with two independent pieces of evidence:
    completions are 100% equal to `answer + <|im_end|>`.
 2. **Behavioural fidelity**: against the **upstream published** Tev1-4B figures —
    **880/1000 (88.0%) + 300/300 (100.0%)**, published via the Together API — our local
-   run of those weights on our own exam showed **no deviation at all (0.00pp)**.
+   run of those weights on our reconstruction of upstream's exam showed **no deviation
+   at all (0.00pp)**.
    Per NOTICE §4 we state only this **relation** ("our reading equals the published
    value"); the reading itself is **not presented as a result of ours**.
 
-The second point means more than "the numbers match": it shows that **our evaluation
-harness** (rendering, constrained decoding, scoring) and upstream's protocol produce
-identical results on this exam. Every cross-model comparison that follows therefore
-rests on an **independently validated measuring instrument**.
+The local end-to-end run matched upstream's **two published sub-set figures** — 880/1000 for
+`main` and 300/300 for `policy_transfer`; whether the per-item predictions are identical was
+**not** checked. Still, every cross-model comparison that follows rests on a measuring
+instrument **cross-checked against upstream's published figures**.
 
 > Third-party weight-distribution licensing prevents us from publishing Tev1-4B's
 > per-item results or other derived figures from our exam; we cite only the figures
@@ -302,12 +312,13 @@ loose cross-key-structure content comparison. The latter two miss, so this is no
 | ReJev-2B r16 (exp002) | 50.00% | **0.00%** | 0.00% | 0/1000/0/1000 |
 | ReJev-2B source-removed r16 (exp006, **released**) | 50.00% | **0.00%** | 0.00% | 0/1000/0/1000 |
 | ReJev-2B r64 probe (exp004) | 48.25% | 96.20% | 99.70% | 962/38/997/3 |
-| Tev1-4B (official weights) ¹ | 50.65% | 1.30% | 0.00% | 13/987/0/1000 |
+| sibling 4B ¹ | 50.65% | 1.30% | 0.00% | 13/987/0/1000 |
 
 > ¹ These are the **upstream-published figures, not our measurement** (the Tev1-4B license
-> is undecided, so we do not release our measured readings for it — see `NOTICE` §4). We ran
-> the weights locally and our readings matched upstream bit-for-bit; the interval and the
-> confusion matrix in that row are uniquely determined by the three published figures on a
+> is undecided, so we do not release our measured readings for the local Tev1-4B weights we
+> ran — see `NOTICE` §4). We ran
+> the weights locally and our readings matched upstream bit-for-bit; the confusion matrix in
+> that row is uniquely determined by the three published figures on a
 > 1000/1000 balanced exam. The row evidences **scoring agreement** — not "both sides ran the
 > same model" (see reading 3), and it is not a validation of our own evaluation path.
 
@@ -315,10 +326,9 @@ loose cross-key-structure content comparison. The latter two miss, so this is no
 > 27 items) is in the per-suite table of the
 > [exp007 record](../experiments/exp007-ood-exam/README.md). They are **not** a primary
 > metric, and limitation (b) already states that this table cannot support
-> "every out-of-distribution task collapses". **The Tev1-4B column of that table is
-> withdrawn** (third-party weights, license undecided — our measured values are not
-> released with this repository), so it shows a withdrawn marker while the other arms
-> are listed as usual.
+> "every out-of-distribution task collapses". **Every cell of the sibling 4B row of that
+> table is an upstream-published figure or derived from published figures — none is our
+> measurement**; the other arms are listed as usual.
 
 Four readings:
 
@@ -340,7 +350,7 @@ Four readings:
    (`hassan/Qwen3.5-4B-v1-new-…`), for which **no config or weight fingerprint is
    available**, so we call it the **"sibling 4B"**, not the same checkpoint — the
    wording `plan/005` pre-registered for the case where that comparison does not hold.
-   The bit-for-bit check and the Tev1-4B row of the table above are also **different
+   The bit-for-bit check and the sibling 4B row of the table above are also **different
    sources**: the row cites the **upstream published** figures (we do not publish our
    own readings for that model), while the check feeds
    *upstream's* per-item artifacts into *our* analyzer. Neither is evidence for the
@@ -425,8 +435,8 @@ misjudges items whose option order differs).
 
 ## 4. Validity and Limitations
 
-**a. In-distribution numbers must not be extrapolated.** 80.50% covers our own exam
-and its kin. §2.5 gives the direct out-of-distribution reading: **collapse**. Any
+**a. In-distribution numbers must not be extrapolated.** 80.50% covers our self-built
+sealed holdout and its kin. §2.5 gives the direct out-of-distribution reading: **collapse**. Any
 claim that "the model can handle X", where X is outside this exam's distribution,
 lacks evidence.
 
@@ -474,7 +484,7 @@ reference to it; on the present material this cannot be ruled out.
 interval contains 0 show only that there is no evidence at this exam's scale — not
 that the two are the same.
 
-**l. No untuned-4B control arm.** In §2.5, Tev1-4B is a 4B base plus the tev1 recipe,
+**l. No untuned-4B control arm.** In §2.5, the sibling 4B is described by upstream as a 4B base plus the tev1 recipe,
 and we did not run that base's untuned version on the same exam. The contributions of
 base and recipe therefore cannot be separated: the reading supports "the collapse is
 not specific to 2B capacity" but **not** "the recipe caused the collapse".
