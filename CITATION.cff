@@ -26,7 +26,7 @@ date-released: "2026-10-04"
 license: MIT
 type: software
 repository-code: "https://github.com/Joe-rq/ReJev"
-# DOI 回填（2026-09-29 首个版本；2026-10-03 补 v1.0.1；v1.0.2 的 version DOI 于发布后回填）：doi 字段放 concept DOI——它对
+# DOI 回填（2026-09-29 首个版本；2026-10-03 补 v1.0.1；2026-10-06 补 v1.0.2）：doi 字段放 concept DOI——它对
 # 所有版本稳定、总是指向最新版，GitHub 引用面板与第三方引用工具读的是它；各 version
 # DOI 列在 identifiers 里，分别标识对应版本的冻结快照。
 doi: 10.5281/zenodo.23036350
@@ -40,6 +40,9 @@ identifiers:
   - type: doi
     value: 10.5281/zenodo.23114463
     description: "Version DOI — v1.0.1 snapshot"
+  - type: doi
+    value: 10.5281/zenodo.23179187
+    description: "Version DOI — v1.0.2 snapshot"
 keywords:
   - decision model
   - LoRA
