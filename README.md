@@ -8,6 +8,11 @@ An independent reproduction of a Jev-style decision-model training pipeline on t
 MiniCPM5-2B, exploring whether a small model can learn stable structured decision
 behavior *without* autoregressive free-form generation.
 
+![Pipeline overview](fig1_pipeline.png)
+
+*The full training-and-evaluation pipeline at a glance; the
+[technical report](docs/report/technical-report.md) walks through it in §1.*
+
 ## Experiment
 
 `state + question + options → one decision`

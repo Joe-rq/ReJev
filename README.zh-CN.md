@@ -7,6 +7,10 @@
 以 MiniCPM5-2B 为底座，对一个 Jev 风格的**选项决策模型**训练流程做独立复现，
 探索小模型能否在**不生成自由文本**的前提下学会稳定的结构化决策行为。
 
+![管线总览](fig1_pipeline.png)
+
+*训练与评测全流程一览；逐步说明见[技术报告](docs/report/technical-report.zh-CN.md)第 1 节。*
+
 ## 实验
 
 `state + question + options → 一个决策`

@@ -2,7 +2,7 @@
 
 **Lightweight decision-model post-training on MiniCPM5-2B: an independent reproduction of a Jev-style pipeline**
 
-Version 1.0.1 · released 2026-09-28, corrected 2026-10-02 · [中文版](technical-report.zh-CN.md)
+Version 1.0.2 · released 2026-09-28, corrected 2026-10-02, revised 2026-10-04 · [中文版](technical-report.zh-CN.md)
 
 ---
 
@@ -42,9 +42,9 @@ main one:
    comparison; after correction, the cost of removing license-restricted corpora
    moves from −2.33pp to **+0.63pp** (95% CI [−1.13, +2.37]).
 
-**What this report does not claim**: it does not claim equivalence with the official
-Jev model; it does not claim to have reproduced Tev1-4B (only its evaluation chain);
-and it does not extrapolate in-distribution numbers out of distribution — on the
+**What this report does not claim**: equivalence with the official Jev model; a
+reproduction of Tev1-4B (only its evaluation chain); or the extrapolation of
+in-distribution numbers out of distribution — on the
 contrary, §2.5 gives the measured out-of-distribution figures.
 
 A note on scope: our public release is an **explicitly enumerated** set. In outline:
@@ -104,8 +104,8 @@ assertions over three keys (same-source detection key, group key, identifier), a
 which it may not be used for training or tuning.
 
 The license status of the five sources is covered in §5 — two of them (AG News,
-SST-5) do not permit redistributing derived data, a fact that directly caused two of
-the training runs in §1.3.
+SST-5) do not permit redistributing derived data, a fact that directly caused the
+source-removed retraining in §1.3 (exp006).
 
 ### 1.3 Training recipe
 
@@ -156,9 +156,9 @@ be attributed to a single variable.
 - **Interval estimation**: a **grouped bootstrap** resampling whole `group_id`
   clusters. The report's two sets of intervals use **different draw counts** (from
   two independent runs) — **do not conflate them**: §2.1 main table uses **2,000
-  draws** (1,000 for per-source tables, `seed=20260925`; see
-  `src/train/jev_compare.py`), while §2.3 uses **10,000 draws** (see the exp006
-  record). The two sets also cover different evaluation sets and subsets; **defer
+  draws** (1,000 for the per-source tables emitted by
+  `src/train/jev_compare.py`, `seed=20260925`), while §2.3 uses **10,000 draws**
+  (see the exp006 record). The two sets also cover different evaluation sets and subsets; **defer
   to the experiment record of the section you are reading**.
   Variants within a group are highly correlated, so the
   per-item independence assumption fails; per-item Wilson intervals are reported for
@@ -245,8 +245,10 @@ Recomputed on the **uncontaminated** sealed holdout (1,892 items):
 | Restricted sources (n=175) | −9.71pp | [−17.14, −2.29] |
 
 Read this as: **on items neither model trained on, no difference was detected** (the
-interval contains 0). The −9.71pp on restricted sources is the direct expression of
-"the model never trained on these two corpora", not a loss of capability. Weighted
+interval contains 0). The −9.71pp on restricted sources is consistent with
+"the model never trained on these two corpora" rather than a loss of capability; but
+as with the headline figure, source removal and re-splitting co-vary, so it likewise
+cannot be attributed to a single variable. Weighted
 consistency check: `(175 × −9.71 + 1,717 × 1.69) / 1,892 = +0.64pp`, 0.01pp away from
 the **+0.63pp** headline — **both values fall inside the range allowed by the rounding
 of the per-subset figures** (solving back: with the per-subset values anywhere within
@@ -261,7 +263,8 @@ not two inconsistent computations.
 Raising LoRA rank from 16 to 64 in the hyperparameters (learning rate, schedule and
 the rest unchanged, though **the data split and evaluation set also differ** — 34,146
 training items and a newly cut 1,802-item eval set) was meant to answer whether the
-weaknesses identified earlier reflected insufficient training or a 2B capacity ceiling.
+weakness identified in the exp003 three-way comparison reflected insufficient training
+or a 2B capacity ceiling.
 
 The result: **total collapse**. On the second holdout the probe scores **27.91%**
 against a base model at **51.22%** (−23.31pp, **below the untuned base**); its
@@ -362,10 +365,11 @@ Four readings:
    with upstream's** — **not** that both sides ran the same model. See
    [exp007 implementation notes](../experiments/exp007-ood-exam/implementation-notes.md),
    deviation 7.
-4. **Contrast: the real Jev did not collapse** (upstream-published recall 42.70%).
+4. **Contrast: the official Jev model did not collapse** (upstream-published
+   recall 42.70%).
    Same exam, same task — **the collapse is not the intrinsic difficulty of the task**;
-   a non-collapsing solution exists. But the real Jev differs from our recipe in both
-   model and training, so more than the recipe varies here — this does not support
+   a non-collapsing solution exists. But the official Jev model differs from our recipe
+   in both model and training, so more than the recipe varies here — this does not support
    attributing the collapse to the recipe alone.
 
 **Two secondary observations**:
@@ -380,7 +384,8 @@ Four readings:
 
 ## 3. Reproducibility Audit Chain
 
-Every conclusion is tied to exact code, weights, data and environment versions.
+Conclusions are tied to exact code, weights, data and environment versions, to the
+extent those were recorded — the gaps are listed below.
 
 **Code**: training commits are recorded in the experiment records for exp001
 (`326ff04`) and exp002 (`9a40878`); they are **not recorded** for exp003 / exp004 /
