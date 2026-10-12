@@ -6,7 +6,7 @@
 **客卷不随本仓发布**（第三方随其评测代码公开，见 `REPRODUCING.md` §6.1）——先自备
 一份与上游逐字节相同的副本，本地转换后上传：
 
-  1. `uv run python src/train/prep_exam.py --exam-dir <你的客卷目录>`
+  1. `uv run --locked --group align python src/train/prep_exam.py --exam-dir <你的客卷目录>`
   2. `modal volume put rejev <转出的 exam.jsonl> /vol/data/exam.jsonl`
   3. `modal deploy src/train/eval_cross.py`（得到 `rejev-eval-cross-v2` app）
 

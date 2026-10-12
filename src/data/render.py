@@ -11,7 +11,8 @@
 - prompt 经官方 chat template，`enable_thinking=False`（尾部空思考块）。
 - 24/24 字母单 token；序列长度逐条断言。
 
-零 GPU（tokenizer-only）。CLI 待真实数据到位后启用；当前由合成样例单测驱动。
+零 GPU（tokenizer-only）。历史数据的隔离重建与全量渲染已实跑；范围与限制见
+`docs/reproducibility/verification.md`，不代表 GPU 成绩复算或渲染历史 bytes 一致。
 """
 
 from __future__ import annotations
@@ -54,15 +55,17 @@ def build_messages(record: dict) -> list[dict]:
     """任务语义层（与 tokenizer 无关）：system + JSON 决策 + assistant 字母。"""
     for field in ("state", "question", "options", "answer"):
         if field not in record:
-            raise ValueError(f"record 缺字段 {field}: {record.get('id', '?')}")
+            raise ValueError(f"record 缺字段 {field}")
     options = record["options"]
     if not isinstance(options, list) or not 2 <= len(options) <= len(LETTERS):
-        raise ValueError(f"选项数须在 2–{len(LETTERS)} 之间: {record.get('id', '?')}")
+        raise ValueError(f"选项数须在 2–{len(LETTERS)} 之间")
+    if any(not isinstance(o, dict) for o in options):
+        raise ValueError("选项须为对象")
     labels = [o.get("label") for o in options]
     if labels != list(LETTERS[:len(options)]):
-        raise ValueError(f"label 须为连续 {LETTERS[:len(options)]}: {record.get('id', '?')}")
+        raise ValueError("label 须为从 A 开始的连续字母")
     if record["answer"] not in labels:
-        raise ValueError(f"answer {record['answer']!r} 不在 label 集: {record.get('id', '?')}")
+        raise ValueError("answer 不在 label 集")
     payload = {k: record[k] for k in ("state", "question", "options")}
     return [
         {"role": "system", "content": SYSTEM},
@@ -77,7 +80,7 @@ def render_one(record: dict, tok) -> dict:
     answer = record["answer"]
     letter_ids = tok.encode(answer, add_special_tokens=False)
     if len(letter_ids) != 1:
-        raise ValueError(f"答案字母非单 token（{answer!r}→{letter_ids}）: {record.get('id', '?')}")
+        raise ValueError("答案字母非单 token")
 
     prompt = tok.apply_chat_template(
         messages[:-1], tokenize=False,
@@ -85,7 +88,7 @@ def render_one(record: dict, tok) -> dict:
     completion = answer + ASSISTANT_END
     n_tokens = len(tok.encode(prompt + completion, add_special_tokens=False))
     if n_tokens > MAX_TOKENS:
-        raise ValueError(f"超长 {n_tokens}>{MAX_TOKENS}: {record.get('id', '?')}")
+        raise ValueError(f"序列超过 {MAX_TOKENS} tokens")
 
     return {
         "id": record.get("id"),
@@ -103,13 +106,13 @@ def render_one(record: dict, tok) -> dict:
 
 
 def render_records(records, tok):
-    """批量渲染；返回 (items, stats)。逐条渲染，失败即中止并带 id 上抛。"""
+    """批量渲染；返回 (items, stats)。逐条渲染，失败即中止，错误不带逐题标识或内容。"""
     items = [render_one(r, tok) for r in records]
     stats = {
         "n": len(items),
         "tokens": sum(i["token_count"] for i in items),
         "max_tokens": max((i["token_count"] for i in items), default=0),
-        "groups": len({i["group_id"] for i in items}),
+        "groups": len({(i["source"], i["group_id"]) for i in items}),
         "model": MODEL,
         "revision": REV,
         "assistant_end": ASSISTANT_END,
@@ -129,13 +132,14 @@ def cross_split_check(train_items, heldout_items) -> dict:
         raise ValueError(
             f"切分泄漏：state 重叠 {len(overlap_states)}，prompt 重叠 {len(overlap_prompts)}")
     return {"cross_split_state_overlap": 0, "cross_split_prompt_overlap": 0,
-            "train_groups": len(train_states), "heldout_groups": len(ho_states)}
+            "train_groups": len({(i["source"], i["group_id"]) for i in train_items}),
+            "heldout_groups": len({(i["source"], i["group_id"]) for i in heldout_items})}
 
 
-def _cli() -> int:
+def _cli_unchecked() -> int:
     """CLI：records jsonl → MiniCPM 渲染导出（instruction/sft/manifest）。
 
-    用法：uv run python src/data/render.py --records <dir|file> --out <dir>
+    用法：uv run --locked --group align python src/data/render.py --records <dir|file> --out <dir>
     输入兼容 tev1 records（new-v1 的 train/dev jsonl）与本仓合成格式。
     """
     import argparse
@@ -149,19 +153,22 @@ def _cli() -> int:
     ap.add_argument("--skip-tok", action="store_true", help="离线：HF 缓存命中时不联网")
     args = ap.parse_args()
     if args.skip_tok:
-        os.environ.setdefault("HF_HUB_OFFLINE", "1")
-
-    from transformers import AutoTokenizer
+        os.environ["HF_HUB_OFFLINE"] = "1"
 
     rec_path = Path(args.records)
     out_dir = Path(args.out)
+    # 重跑一开始就撤销旧成功标记；中途失败的混合文件不可视为完整产物。
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "render-manifest.json").unlink(missing_ok=True)
+    if any(out_dir.iterdir()):
+        raise ValueError("输出目录须为空；请换新目录重建")
     files = sorted(rec_path.glob("*.jsonl")) if rec_path.is_dir() else [rec_path]
     if not files:
-        print(f"找不到 records：{rec_path}", file=sys.stderr)
+        print("FAIL: 找不到 records 文件。", file=sys.stderr)
         return 2
 
+    from transformers import AutoTokenizer
     tok = AutoTokenizer.from_pretrained(MODEL, revision=REV)
-    out_dir.mkdir(parents=True, exist_ok=True)
     all_stats = {}
     for f in files:
         split = f.stem
@@ -185,6 +192,16 @@ def _cli() -> int:
         json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"manifest → {out_dir / 'render-manifest.json'}")
     return 0
+
+
+def _cli() -> int:
+    try:
+        return _cli_unchecked()
+    except Exception as exc:
+        # 不公开异常原文（可能带逐题 ID、答案、题面、路径或认证信息）。
+        import sys
+        print(f"FAIL: 渲染未完成（{type(exc).__name__}）；输出不可用于后续步骤。", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

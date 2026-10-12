@@ -1,5 +1,5 @@
 {
-  "_description": "本项目实际使用的上游来源锁定表。datasets 与 tev1 上游（commit 1dde778）的 sources.lock.json 一致——这些是 <state, question, options> records 的来源。tokenizer 一节说明本项目实际使用的 tokenizer：tev1 上游的数据构建管线用 Qwen tokenizer 预渲染，而本项目不沿用其渲染结果，改用自己的 render.py 以 MiniCPM5-2B 重新渲染（故两个 tokenizer 都需要锁定）。",
+  "_description": "本项目实际使用的上游来源锁定表。datasets 的 repo/revision/config 与 tev1 上游（commit 1dde778）的 sources.lock.json 一致，另附许可解释字段——这些是 <state, question, options> records 的来源。tokenizer 一节说明本项目实际使用的 tokenizer：tev1 上游的数据构建管线用 Qwen tokenizer 预渲染，而本项目不沿用其渲染结果，改用自己的 render.py 以 MiniCPM5-2B 重新渲染（故两个 tokenizer 都需要锁定）。",
   "datasets": {
     "mnli": {
       "repo": "nyu-mll/multi_nli",
@@ -46,7 +46,7 @@
       "revision": "e51bdcd8cd3a30da231967c1a249ba59361279a3",
       "config": null,
       "license_metadata": "unspecified",
-      "_license_note": "上游无任何许可声明——既未授权也未禁止。使用及衍生发布前须自行确认。",
+      "_license_note": "本仓未发现上游许可声明；不据此推断可使用。使用及衍生发布前须确认授权。",
       "url": "https://huggingface.co/datasets/SetFit/sst5"
     }
   },

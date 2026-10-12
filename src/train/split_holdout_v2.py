@@ -50,7 +50,7 @@ def main() -> int:
 
     src = REPO / args.src
     rows = load_jsonl(src)
-    print(f"源：{src.relative_to(REPO)} · {len(rows)} 条")
+    print(f"源：{src.relative_to(REPO, walk_up=True)} · {len(rows)} 条")
     assert len(rows) == 35948, f"源条数异常 {len(rows)}（应为 exp002 的 train 35,948）"
 
     groups: dict[tuple, list] = defaultdict(list)
@@ -86,7 +86,7 @@ def main() -> int:
     manifest = {
         "created": "2026-09-25",
         "purpose": "004 弱项探针的新封存集；原 holdout 降级为开发集",
-        "source": str(src.relative_to(REPO)),
+        "source": str(src.relative_to(REPO, walk_up=True)),
         "source_sha256": filesha(src),
         "frac_groups": args.frac, "seed": args.seed,
         "counts": {"train": len(train), "holdout": len(holdout)},
@@ -105,7 +105,7 @@ def main() -> int:
     mp = REPO / args.out_dir / "holdout2-manifest.json"
     mp.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps(manifest, indent=2, ensure_ascii=False))
-    print(f"\n→ {out}/rejev2-{{train,holdout}}.jsonl · {mp.relative_to(REPO)}")
+    print(f"\n→ {out}/rejev2-{{train,holdout}}.jsonl · {mp.relative_to(REPO, walk_up=True)}")
     return 0
 
 

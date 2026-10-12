@@ -8,8 +8,7 @@
 
 | 标记 | 含义 |
 |---|---|
-| **[已验]** | 在本仓导出集上实际执行过 |
-| **[未验·需 token]** | 需要 HuggingFace token 下载数 GB 数据；本仓发布前**未**在干净环境重跑 |
+| **[已验]** | 在本仓导出集或其对应源码快照上实际执行过，范围见相应验证记录 |
 | **[未验·需额度]** | 需要 Modal 账号与 GPU 额度；本仓发布前**未**重跑（GPU 计费） |
 
 **当前状态**：本文档的**结构完整性**可由你自己复跑核验，命令见文末「复跑校验」。
@@ -17,22 +16,21 @@
 确实存在、文本里不出现内部工作区路径、markdown **表格列数一致**、`.py`/`.sh` 语法可解析。
 ⚠️ **它不检查 `data/` 一类路径**——那些是你要自己构建的（见第 2 节），本仓不发布数据，
 它们在发布集里**一个都不存在**；「路径引用」一栏全绿**不等于**「文档里提到的路径都在」。
-**端到端复现链未在干净环境跑过**——它需要 HF token 与 Modal GPU 额度。这一点如实记录，
-不写成「已验证」。
+**GPU 实验复现链未在干净环境重跑**——它需要 Modal GPU 额度。公开源→历史 records→两次切分→本仓渲染的数据链已完成隔离重建，范围与缓存条件见[数据验证记录](docs/reproducibility/verification.md)。
 
 ---
 
 ## 0. 前置条件
 
 - Python ≥ 3.12、[uv](https://docs.astral.sh/uv/)
-- （步骤 2 起）HuggingFace 账号与 token
+- 数据链本轮匿名下载成功；若来源平台要求认证，自行配置 HuggingFace token，勿打印凭据
 - （步骤 4 起）Modal 账号与 GPU 额度，且已配置零自付边界（见步骤 7）
 
 ## 1. 本地环境 **[已验]**
 
 ```bash
 git clone https://github.com/Joe-rq/ReJev && cd ReJev
-uv sync --group align
+uv sync --locked --group align --python 3.14.3
 ```
 
 > **为什么必须带 `--group align`**：数据链与对齐检查所需的 `transformers` / `jinja2` 声明在
@@ -43,26 +41,26 @@ uv sync --group align
 验证安装：
 
 ```bash
-uv run python -c "import transformers, jinja2; print(transformers.__version__)"
+uv run --locked --group align python -c "import transformers, jinja2; print(transformers.__version__)"
 ```
 
-## 2. 数据链 **[未验·需 token]**
+## 2. 数据链 **[已验]**
 
 本仓**不分发数据**。数据链分四步，其中**前两步依赖 tev1 上游仓库**（MIT）——
 本仓不复制它的构建管线，需自行获取。
 
+完整来源、两次切分的固定哈希与精确重建命令见[历史评测数据重建](docs/reproducibility/README.md)。
+数据链的验证范围见[验证记录](docs/reproducibility/verification.md)；GPU 训练/评测仍未在干净环境复跑。
+
 ### 2.1 获取上游构建器
 
-```bash
-git clone https://github.com/togethercomputer/tev1
-cd tev1 && git checkout 1dde778     # 本项目锁定的 commit
-```
+按[重建说明](docs/reproducibility/README.md) §2 获取固定提交的上游源码并安装独立环境。该页维护完整 commit、来源 lock 指纹与精确命令。
 
 ### 2.2 下载数据源
 
 按 `sources.lock.json` 中锁定的 repo 与 revision 下载五个数据集
-（mnli / boolq / banking77 / ag_news / sst5）与两个 tokenizer。
-用上游的 `fetch_sources.py`，或自行按 lock 文件下载——
+（mnli / boolq / banking77 / ag_news / sst5）。上游 `fetch_sources.py` 获取五源与 Qwen tokenizer；
+本仓渲染器另按锁定 revision 获取 MiniCPM tokenizer。
 **务必按 revision 拉取**，不要用默认分支。
 
 > ⚠️ 许可提示：AG News 的上游卡片标注 research/non-commercial，SST-5 未标注许可。
@@ -71,33 +69,21 @@ cd tev1 && git checkout 1dde778     # 本项目锁定的 commit
 ### 2.3 构建 records（上游脚本）
 
 用 tev1 的构建管线把原始数据变成 `state / question / options / answer` 语义层。
-本仓锁定其 commit `1dde778`，产物为 `new-v1` 的 `train.jsonl` / `dev.jsonl`。
+固定提交与四层 builder 顺序见上述重建说明；产物为 `new-v1` 的 `train.jsonl` / `dev.jsonl`。
 
 ### 2.4 渲染与切分（本仓脚本）**[已验]**
 
-```bash
-# 分层切分：训练集 / 封存留出集 / 开发集，并写出零泄漏断言
-uv run python src/data/split_holdout.py \
-    --records-dir <上游 new-v1 records 目录> \
-    --out-dir data/rejev
+按[重建说明](docs/reproducibility/README.md) §3 与 §4 执行第一次切分、固定哈希核对与 MiniCPM 渲染。精确路径、seed 与环境参数只在该说明维护。
 
-# 渲染为 MiniCPM5-2B 的 instruction / messages 格式
-uv run python src/data/render.py \
-    --records data/rejev/records/train.jsonl \
-    --out data/rejev-render/train
-```
-
-`split_holdout.py` 会输出 `holdout-manifest.json`，内含内容哈希与「三口径零泄漏」断言
-（`statehash` / `group_id` / `id`）。**留出集自此封存：不得用于训练或调参。**
+`split_holdout.py` 会输出 `holdout-manifest.json`，内含内容哈希与 `statehash` / `group_id` 双口径零泄漏断言。
+这里重建的是已被开发消费的历史切分，不是新的未触碰终评集；封存 manifest 的旧 policy
+仅记录当时纪律，当前角色和污染限制见报告与上述重建说明。
 
 ### 2.5 第二张封存集（exp004 / exp006 用）**[已验]**
 
 报告 §2.4 与 §2.3 涉及的第二张留出集（1,802 题）由**另一个脚本**从 train 再切一次：
 
-```bash
-# 从 rejev-train 再切 5%（按 group 分层），产出 data/rejev2/
-uv run python src/train/split_holdout_v2.py --frac 0.05 --seed 20260925
-```
+按[重建说明](docs/reproducibility/README.md) §3 执行第二次切分；显式指定第一次 train 的路径，不另用默认输入目录。
 
 切分规则与 `split_holdout.py` 逐字相同，理由见 `docs/plan/004_weakness-probe.md`：原 holdout
 已被 exp002/exp003 用过，按「留出集不得用于调参」的纪律不能再指导下一轮。切完之后原 holdout
@@ -112,7 +98,7 @@ uv run python src/train/split_holdout_v2.py --frac 0.05 --seed 20260925
 零 GPU（只需 tokenizer）：
 
 ```bash
-uv run python src/align/v1a_check.py --offline
+uv run --locked --group align python src/align/v1a_check.py --offline
 ```
 
 七项检查应全 PASS：来源锁定、特殊 token 映射、模板渲染、字母 tokenization、
@@ -129,7 +115,7 @@ loss mask、结束标记、解析对抗。若 `--offline` 用本地缓存；去�
 
 ```bash
 # ① 数据准备（本地，零 GPU）：剔源 + 切分校验 + 渲染
-uv run python src/train/prep_clean.py          # → data/clean/
+uv run --locked --group align python src/train/prep_clean.py          # → data/clean/
 
 # ② 上传数据到 Modal Volume
 modal volume create rejev          # 已存在同名 Volume 会失败——那就跳过这条
@@ -179,7 +165,7 @@ EXPECT_SHA=<你的指纹> modal run tools/trigger_eval.py
 
 ```bash
 # 逐题结果 → 汇总（分 source 分层、四象限、McNemar）
-uv run python src/train/compare.py --help
+uv run --locked --group align python src/train/compare.py --help
 ```
 
 统计口径注意：**同一 group 的多个变体题目高度相关**，逐题独立性假设不成立。
@@ -190,7 +176,7 @@ uv run python src/train/compare.py --help
 ```bash
 # 默认读两张封存留出集：data/rejev/records/rejev-holdout.jsonl 与
 # data/rejev2/records/rejev2-holdout.jsonl——**先完成 §2.4 与 §2.5**，否则会提示缺文件
-uv run python src/train/noskill_baseline.py
+uv run --locked --group align python src/train/noskill_baseline.py
 ```
 
 输出**两张留出集各自的一块**（每块四个数：逐题随机 / 恒定最常见字母 / 恒定最常见语义 key /
@@ -209,10 +195,10 @@ uv run python src/train/noskill_baseline.py
 
 ```bash
 # ① 先只验副本真伪：把上游逐题产物喂进本分析器，必须逐位复现上游公布数字
-uv run python src/train/exam_report.py --exam-dir <你的客卷目录> --selfcheck-only
+uv run --locked --group align python src/train/exam_report.py --exam-dir <你的客卷目录> --selfcheck-only
 
 # ② 自检通过后，再跑本仓臂的判读（--dir 指向含 cross-*-exam.jsonl 的目录）
-uv run python src/train/exam_report.py --dir <臂产物目录> --exam-dir <你的客卷目录>
+uv run --locked --group align python src/train/exam_report.py --dir <臂产物目录> --exam-dir <你的客卷目录>
 ```
 
 **自检不过则拒绝产出**——那说明副本不对（或分析器有 bug），**不是**「上游错了」。
@@ -222,11 +208,11 @@ uv run python src/train/exam_report.py --dir <臂产物目录> --exam-dir <你�
 
 ```bash
 # 0a. 客卷 → 本项目评测格式（同样要 --exam-dir）
-uv run python src/train/prep_exam.py --exam-dir <你的客卷目录>
+uv run --locked --group align python src/train/prep_exam.py --exam-dir <你的客卷目录>
 
 # 0b. tev1 官方考卷 → 本项目评测格式（报告 §2.1/§2.3 的 1,300 题）
 #     需要上游 tev1 检出（见第 2.1 节）：
-uv run python src/train/prep_paper.py --tev1-dir <tev1 检出目录>/resources/tev1
+uv run --locked --group align python src/train/prep_paper.py --tev1-dir <tev1 检出目录>/resources/tev1
 ```
 
 `prep_exam.py` 的**校验 0** 会把 `inputs.json` 的 sha256 与同一目录下上游
@@ -284,7 +270,7 @@ modal app list        # 确认无残留任务（零残留是每轮收尾的必�
 上面的「结构完整性」不是自述——你可以自己跑：
 
 ```bash
-uv run python tools/verify-repro-path.py .
+uv run --locked --group align python tools/verify-repro-path.py .
 ```
 
 它核对六件事：markdown 的**行内链接**是否有效（引用式链接与 HTML 锚点不在覆盖范围）、
@@ -293,16 +279,14 @@ uv run python tools/verify-repro-path.py .
 相同）、所有 `.py` 能否被解析、所有 `.sh` 能否通过 `bash -n`。
 **零依赖、不联网、不需要 token。**
 
-发布集另附**单元测试 6 个文件、96 个用例**（`src/data/test_render.py` 1 个 ＋ `src/train/test_*.py`
-5 个），按目录分别复跑：
+发布集另附**单元测试（按目录执行，实际数量以运行输出为准）**（含 `src/data/test_*.py` 与 `src/train/test_*.py`），按目录分别复跑：
 
 ```bash
-uv run --group align python -m unittest discover -s src/data    # 12 用例（需 transformers）
-uv run --group align python -m unittest discover -s src/train   # 84 用例（零依赖）
+uv run --locked --group align python -m unittest discover -s src/data    # 数据层用例（含重建反例，需 transformers）
+uv run --locked --group align python -m unittest discover -s src/train   # 训练侧用例（零依赖）
 ```
 
-它们覆盖数据链的渲染/切分与训练侧产物处理；**不保证**在任意环境通过（本仓未做端到端
-冷启动验证，见文末），但这是发布时逐条实跑通过的入口。
+它们覆盖数据链的渲染/切分与训练侧产物处理；**不保证**在任意环境通过。数据链的新环境与缓存条件见[验证记录](docs/reproducibility/verification.md)；含 GPU 的完整实验链未从零重跑，但这里是已逐条实跑通过的测试入口。
 
 ⚠️ 四处边界请一并知道：
 1. **路径引用只覆盖上述四个前缀**（文件与目录两种形式）——`data/…`、`resources/…` 不在检查范围内（它们本就不随
@@ -344,7 +328,6 @@ find . -type f -not -path './.git/*' -not -path './.venv/*' -not -path '*/__pyca
 
 ## 附：本仓未做的事（避免误解）
 
-- **无端到端冷启动验证**：上述步骤源自原始实验的真实执行路径，但**未**在一个全新的
-  干净环境里从零跑通。若你发现某步走不通，那是本仓的缺口，欢迎指出。
+- **未重跑含 GPU 的完整实验链**：数据链已在隔离环境从公开源重建，具体范围见[验证记录](docs/reproducibility/verification.md)。训练与评测链仍未在全新环境从零跑通。
 - **无 GPU 复现**：发布前未重跑训练与评测（需要额度）。
 - **不含数据与权重**：两者均需自行获取/训练，见第 2 节与 [NOTICE](NOTICE)。

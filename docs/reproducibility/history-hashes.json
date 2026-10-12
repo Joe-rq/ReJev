@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "upstream_commit": "1dde7782382c9f49d627153759b8d1deab426ce0",
+  "split_parameters": {
+    "holdout1": {
+      "seed": 20260924,
+      "group_fraction": 0.05
+    },
+    "holdout2": {
+      "seed": 20260925,
+      "group_fraction": 0.05
+    }
+  },
+  "files": {
+    "upstream/train.jsonl": {
+      "sha256": "81eba531a7e49b7846cf94f386cca6b493de103f5a071676579e985db77697a5",
+      "rows": 37840,
+      "groups": 18480,
+      "sources": {
+        "policy_v2": 12000,
+        "ag_news": 1500,
+        "routing_v2": 6000,
+        "sst5": 2000,
+        "boolq": 3000,
+        "banking77": 3000,
+        "mnli": 5000,
+        "policy": 1500,
+        "research_taxonomy_v21": 3840
+      }
+    },
+    "upstream/dev.jsonl": {
+      "sha256": "3efbbff9b87c53b7e8c59edda4d4c19ba6405103c2258406475c32defc18dc95",
+      "rows": 4568,
+      "groups": 2296,
+      "sources": {
+        "boolq": 400,
+        "sst5": 250,
+        "banking77": 400,
+        "policy_v2": 1200,
+        "routing_v2": 600,
+        "research_taxonomy_v21": 768,
+        "mnli": 550,
+        "ag_news": 250,
+        "policy": 150
+      }
+    },
+    "rejev/rejev-train.jsonl": {
+      "sha256": "aa1e490abdeb5831fd8928039155c5ec804ec1aa07182eb657fb13e08b880b85",
+      "rows": 35948,
+      "groups": 17556,
+      "sources": {
+        "policy_v2": 11400,
+        "ag_news": 1425,
+        "routing_v2": 5700,
+        "sst5": 1900,
+        "boolq": 2850,
+        "banking77": 2850,
+        "mnli": 4750,
+        "policy": 1425,
+        "research_taxonomy_v21": 3648
+      }
+    },
+    "rejev/rejev-holdout.jsonl": {
+      "sha256": "2601d649573f2b9940584ae521ad05a3ea52003ac91eb9df51557f09e0a79063",
+      "rows": 1892,
+      "groups": 924,
+      "sources": {
+        "routing_v2": 300,
+        "ag_news": 75,
+        "policy_v2": 600,
+        "mnli": 250,
+        "banking77": 150,
+        "policy": 75,
+        "research_taxonomy_v21": 192,
+        "sst5": 100,
+        "boolq": 150
+      },
+      "statehashes_sha256": "5c9612bf2929af41b4de0e0fafad32a8d80a392de1165b0f263d6c4be97bd86f"
+    },
+    "rejev/rejev-dev.jsonl": {
+      "sha256": "3efbbff9b87c53b7e8c59edda4d4c19ba6405103c2258406475c32defc18dc95",
+      "rows": 4568,
+      "groups": 2296,
+      "sources": {
+        "boolq": 400,
+        "sst5": 250,
+        "banking77": 400,
+        "policy_v2": 1200,
+        "routing_v2": 600,
+        "research_taxonomy_v21": 768,
+        "mnli": 550,
+        "ag_news": 250,
+        "policy": 150
+      }
+    },
+    "rejev2/rejev2-train.jsonl": {
+      "sha256": "a4b8b5d64c4ec4ec2bd20929c6f1d19f9423c795de5c42fec228a3b61ebddbd3",
+      "rows": 34146,
+      "groups": 16678,
+      "sources": {
+        "policy_v2": 10830,
+        "ag_news": 1354,
+        "routing_v2": 5412,
+        "sst5": 1805,
+        "boolq": 2708,
+        "mnli": 4512,
+        "policy": 1353,
+        "banking77": 2708,
+        "research_taxonomy_v21": 3464
+      }
+    },
+    "rejev2/rejev2-holdout.jsonl": {
+      "sha256": "75d316932cfa928a36868b752301139adaeb340fbf40bbdb43bc12990b9c3213",
+      "rows": 1802,
+      "groups": 878,
+      "sources": {
+        "banking77": 142,
+        "policy_v2": 570,
+        "routing_v2": 288,
+        "research_taxonomy_v21": 184,
+        "boolq": 142,
+        "mnli": 238,
+        "sst5": 95,
+        "policy": 72,
+        "ag_news": 71
+      }
+    }
+  }
+}

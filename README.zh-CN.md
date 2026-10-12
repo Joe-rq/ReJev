@@ -75,8 +75,8 @@ docs/experiments/  各轮实验记录（配置、结果、效度边界、复现�
 ## 快速开始
 
 ```bash
-uv sync --group align          # 本地环境：数据链与对齐检查（tokenizer-only，零 GPU）
-uv run python src/align/v1a_check.py --offline   # 7 项对齐检查
+uv sync --locked --group align --python 3.14.3          # 本地环境：数据链与对齐检查（tokenizer-only，零 GPU）
+uv run --locked --group align python src/align/v1a_check.py --offline   # 7 项对齐检查
 ```
 
 训练与评测在 Modal 上跑（需要账号与 GPU 额度）。训练脚本**必须**用 `deploy` + `spawn`

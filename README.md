@@ -88,8 +88,8 @@ docs/experiments/  per-round records (config, results, validity boundaries, repr
 ## Quick start
 
 ```bash
-uv sync --group align          # local env: data pipeline + alignment checks (tokenizer-only, zero GPU)
-uv run python src/align/v1a_check.py --offline   # 7 alignment checks
+uv sync --locked --group align --python 3.14.3          # local env: data pipeline + alignment checks (tokenizer-only, zero GPU)
+uv run --locked --group align python src/align/v1a_check.py --offline   # 7 alignment checks
 ```
 
 Training and evaluation run on Modal (account and GPU credit required). Use
