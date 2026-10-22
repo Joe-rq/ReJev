@@ -34,8 +34,8 @@ uv sync --locked --group align --python 3.14.3
 ```
 
 > **为什么必须带 `--group align`**：数据链与对齐检查所需的 `transformers` / `jinja2` 声明在
-> `[dependency-groups] align` 中，而本仓 `[project]` 的 `dependencies` 是空的、`[dependency-groups]`
-> 也只声明了 `align` 这一组（uv 的默认组 `dev` 本仓并不存在）。`uv sync` 不带参数
+> `[dependency-groups] align` 中，而本仓 `[project]` 的 `dependencies` 是空的；`[dependency-groups]`
+> 还声明了 `figures` 组（仅用于重生成图 4–6，见下）（uv 的默认组 `dev` 本仓并不存在）。`uv sync` 不带参数
 > 只会装出一个空环境，随后在 `import transformers` 处失败。
 
 验证安装：
@@ -44,10 +44,17 @@ uv sync --locked --group align --python 3.14.3
 uv run --locked --group align python -c "import transformers, jinja2; print(transformers.__version__)"
 ```
 
+若需重生成图 4–6（可选）：
+
+```bash
+uv sync --locked --group figures
+uv run --locked --group figures python -c "import matplotlib; print(matplotlib.__version__)"
+```
+
 ## 2. 数据链 **[已验]**
 
 本仓**不分发数据**。数据链分四步，其中**前两步依赖 tev1 上游仓库**（MIT）——
-本仓不复制它的构建管线，需自行获取。
+本仓复用它的构建器，但不把其代码复制进本仓，需自行获取上游仓库。
 
 完整来源、两次切分的固定哈希与精确重建命令见[历史评测数据重建](docs/reproducibility/README.md)。
 数据链的验证范围见[验证记录](docs/reproducibility/verification.md)；GPU 训练/评测仍未在干净环境复跑。

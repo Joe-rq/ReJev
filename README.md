@@ -112,8 +112,9 @@ Full steps, including a **verification tier table**, are in **[REPRODUCING.md](R
 - **MiniCPM5-2B** (Apache-2.0) — base model and its official TRL LoRA SFT recipe.
 - Data sources and their license status: see [NOTICE](NOTICE) and `sources.lock.json`.
 
-This repository contains **no** data, model weights or per-item results, and
-distributes **no** Tev1-4B assets.
+This repository contains **no** source datasets or model weights and no **full** per-item result
+files; the only per-item material is the small set of example case records described
+in the technical report (Appendix B.5). It distributes **no** Tev1-4B assets.
 
 ## License
 

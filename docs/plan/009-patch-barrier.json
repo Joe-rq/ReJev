@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "patched_dir": "<patched-dir>",
+  "patch_sha256": "0b210096eac05774c7ae3d19be0b4c8d617df1f980ed9dd6339c8f6afda40d1e",
+  "frozen_statehashes_sha256": "432eb8ef7183d1ed23b0c7401a98cf4de570e2f344b1ead6633a4630d88cb622",
+  "counts": {
+    "train": 6000,
+    "dev": 1000,
+    "calibration": 1000,
+    "test": 1000
+  },
+  "expected_counts": {
+    "train": 6000,
+    "dev": 1000,
+    "calibration": 1000,
+    "test": 1000
+  },
+  "frozen_hits": {
+    "train": 0,
+    "dev": 0,
+    "calibration": 0,
+    "test": 0
+  },
+  "fail_closed": true,
+  "negative_control": {
+    "status": "PASS",
+    "target_source": "mnli",
+    "target_statehash": "f146a326c6d1317102cfe59b5dd554854e7104ca79a724cdef8b4c6d2c510f05",
+    "target_hits_in_dev_cal_test": {
+      "dev": 0,
+      "calibration": 0,
+      "test": 0
+    },
+    "note": "把一个已知公开 test state 放进 old，再跑 public_data；该 statehash 被 forbidden 排除。"
+  },
+  "positive_control_frozen_list": {
+    "status": "PASS",
+    "target_statehash": "f146a326c6d1317102cfe59b5dd554854e7104ca79a724cdef8b4c6d2c510f05",
+    "target_hits_in_dev_cal_test": {
+      "dev": 0,
+      "calibration": 0,
+      "test": 0
+    },
+    "note": "把同一 statehash 写进临时冻结清单，再跑 public_data；证明 frozen_statehashes 的清单侧路径被使用。"
+  },
+  "note": "public_data 生成的 9,000 行全部不命中冻结清单；缺 env 时明确报错；负控（old 侧）与阳性对照（冻结清单侧）均证明屏障在排除已知 state。"
+}

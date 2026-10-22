@@ -1,0 +1,473 @@
+{
+  "schema_version": 1,
+  "created": "2026-10-18",
+  "updated": "2026-10-19",
+  "plan": {
+    "path": "docs/plan/009_report-enhancement-experiments.md",
+    "sha256": "56b068a59da0d5e1b89639a4edad2142d87a3bb63c42c16f02f0c6e940b1d087"
+  },
+  "s0_manifest": {
+    "path": "docs/plan/009-s0-manifest.json",
+    "sha256": "5c33d48ba9d03fac4bbfef71317a054642467ef8432381f4069104d4c444f418"
+  },
+  "authorization": {
+    "owner": "2026-10-18 「批准 S1」",
+    "scope": "plan/009 S1：4 臂训练 + 候选评分 + 逐臂温度 + test2 终评 + 置换 + 错误分析；不扩大数据/发布边界"
+  },
+  "route": "A2′：训练集＝历史 train-clean；只换 SEED 重建评测侧三切分",
+  "seeds": [
+    42,
+    17,
+    29,
+    41
+  ],
+  "arms": [
+    "base-c0",
+    "hist",
+    "seed42",
+    "seed17",
+    "seed29",
+    "seed41"
+  ],
+  "training_data": {
+    "path": "data/clean/train-clean.jsonl",
+    "sha256": "bce0ae242975f23854a34341a11275de4cec2f7ec5d889cc3f726c78fe5b664d",
+    "rows": 30987
+  },
+  "eval2_files": {
+    "dev2": {
+      "path": "data/eval2-final-20261017/records/dev2.jsonl",
+      "sha256": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+      "rows": 500
+    },
+    "calibration2": {
+      "path": "data/eval2-final-20261017/records/calibration2.jsonl",
+      "sha256": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+      "rows": 1500
+    },
+    "test2": {
+      "path": "data/eval2-final-20261017/records/test2.jsonl",
+      "sha256": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5",
+      "rows": 3800
+    },
+    "test2_permuted": {
+      "path": "data/eval2-final-20261017/records/test2-permuted.jsonl",
+      "sha256": "184f02bb39d87975d910eac35729eee2e31c76437189430495a0e9e8bd7114ef",
+      "rows": 3800,
+      "manifest": "docs/plan/009-test2-permuted.json"
+    }
+  },
+  "protocols": {
+    "main_metric": "候选评分（plan §3.5.1-1 A）；同题配对 accuracy 差（每臂 − base-C0），按 task/source 语义 macro-F1 与每类 recall 分层",
+    "candidate_scoring": {
+      "position": "最后一个 prompt token 的 logits",
+      "mask": "本题有效选项字母",
+      "label_ids": "S0 render contract A→54…X→77",
+      "softmax": true,
+      "scoring_version": "s1-candidate-v2",
+      "coverage": "构造上每题都有有效 mask；只报告成功评分比例，不作格式能力主张"
+    },
+    "calibration": {
+      "fit_split": "calibration2",
+      "T_per_arm": true,
+      "T_range": [
+        0.05,
+        20
+      ],
+      "fit_method": "log 空间 4001 点网格（含 T=1），最小化 hard-label 平均 NLL；边界如实报告",
+      "apply": "test2 只应用冻结 T_a，不重拟合",
+      "nll": "样本平均",
+      "brier": "多分类求和式",
+      "ece": "top-label，15 等宽箱",
+      "c3_check": "calibrated argmax 必须与 raw 逐题一致；否则停止排查"
+    },
+    "permutation": {
+      "source": "docs/plan/009-test2-permuted.json",
+      "rule": "shift = 1 + (sha256(id)%(n-1)); left rotation; relabel A..; semantic key & description preserved",
+      "metric": "按语义 key 还原的一致率、翻转率、family-clustered 95% 区间",
+      "labels": {
+        "high_sensitivity": "翻转率点估计 ≥ 0.20",
+        "low_sensitivity": "一致率 ≥ 0.95 且区间下界 ≥ 0.90",
+        "otherwise": "不确定"
+      }
+    },
+    "interval": {
+      "family_clustered_bootstrap": 10000,
+      "bootstrap_seed": 20261018,
+      "paired": "同题配对差值在每次重采样内重算",
+      "separation": "训练间差异与样本抽样不确定性分开报"
+    },
+    "error_analysis": "按 009-s0-manifest.json 的 error_analysis_protocol v3；分母 1,659 test2 families；案例在全部结果冻结后按 group_id 升序取前 10",
+    "stability": "正向性为必要条件（四臂差值均为正；0 视为未通过）；报 SD 与配对区间；不设 SD 阈值、不设实用改善界；不挑最佳 seed",
+    "selective_prediction": "全部六臂报告 raw/calibrated 的 p_max 覆盖率—错误率曲线；只报告，不据 test2 调回退阈值",
+    "c2_deltas": "NLL/Brier/ECE 相对 base-C0 与 calibrated−raw 的配对差；NLL/Brier 用逐题值，ECE 在每次 family 重采样内重算；10,000 次、seed 20261018",
+    "position_preference": "逐臂 test2 预测字母计数；只作位置偏好诊断，不作分类收益主证据",
+    "task_uncertainty": "按 source 的 accuracy/macro-F1/NLL/Brier/ECE 均给 family-clustered 区间；seed 臂另给按 source 的配对 accuracy 差；小样本格报告 n/family 数"
+  },
+  "loss_window_correction": {
+    "finding": "2026-10-18 复核 transformers 5.6.2：Trainer.train 返回的 train_loss 是累计均值（trainer.py:1826 `_total_loss_scalar / effective_global_step`），不是 plan §5.1 所称「末 50 步滑动均值」；exp006 的 0.4486 同样是累计值。",
+    "s1_implementation": "S1Trainer.training_step 记录 Trainer 返回的贡献量（父类已按 GA 或组内监督 token 数归一）；同一优化步内求和，再对最后 50 个优化步取均值；validate_step_losses 校验整数步号、有限值、连续步号、每步贡献数量；checkpoint 内先写并验证 loss_window.json，再写 _COMPLETE；续跑恢复窗口；不足 50 步或校验失败时 last_50=null，不填短窗口。同时保留 cumulative。",
+    "threshold_effect": "不改变任何判读门槛；只是把两个口径分开命名。"
+  },
+  "health_gate": {
+    "run_health": {
+      "execution_or_protocol_failure": "NaN/OOM/超时/数据或模板错配：可续跑或重试，完整记录",
+      "complete_but_poor": "完整执行但表现差：属于研究结果，进主统计与失效计数，不重训、不剔除",
+      "first_complete_run": "不得替换；重训单列登记",
+      "retry_cap": "S1 全程最多 1 次完整重训，且仅当实际已花＋预计 ≤ $30；否则停",
+      "loss_window": "末 50 步滑动均值（2026-10-18 更正：exp006 的 0.4486 是 Trainer 累计均值，不是末 50 步；S1 另用 per-step 贡献量按步求和后取真末 50 步，两者不可直接比）。"
+    },
+    "stability": {
+      "positive_direction": "四臂相对 base-C0 的主指标差值均为正；0 视为未通过",
+      "consistency": "报 seed 间 SD 与配对区间；本轮不另设 SD 阈值、不设实用改善界",
+      "no_best_seed": "终评不挑最佳 seed；报告全部运行、每 seed 成绩、均值与 SD"
+    },
+    "uncertainty": {
+      "seed_df": 3,
+      "sd_95_interval_factor": [
+        0.57,
+        3.73
+      ],
+      "clustering": "按 family 聚类；训练间差异与样本抽样不确定性分开报，不合成一个区间"
+    },
+    "s1_precondition": "本 manifest 的 thresholds 与 rng_protocol 在 S1 开训前复核后生效；未锁定前不得启动训练。",
+    "implementation": "非有限 raw loss 立即停止并保留 checkpoint；步数/处理后行数/adapter 有限性检查；完整执行但表现差不重训",
+    "loss_window": "末 50 步滑动均值（S1 真窗口：S1Trainer 记录 per-step loss，按优化步归并；exp006 的 0.4486 是累计值，不可直接比）",
+    "cumulative_note": "续跑返回的 cumulative：分子是本次调用累计的 loss 贡献，分母是最终 global_step；既不是整臂完整均值，也不是本次续跑段均值；不能与未中断的 exp006 无条件比较。"
+  },
+  "budget": {
+    "cap_usd_credit": 30,
+    "breakdown_usd": {
+      "training_4_arms": 15.4,
+      "test2_six_arms_eval": 2.3,
+      "calibration2_dev2": 1.2,
+      "permutation_and_extra_inference": [
+        3,
+        5
+      ]
+    },
+    "point_estimate_usd": [
+      22,
+      24
+    ],
+    "with_reserve_usd": 26,
+    "with_one_retrain_usd": 27,
+    "with_two_retrains_usd": 31,
+    "stop_condition": "实际已花＋预计超过 $30 credit 即停并修订方案；不静默缩评测或省一臂",
+    "accounting": "S1 逐臂记账；每次远程运行前实时核对 credit/spend limit/活动任务，结束后核对 Modal 实际账单并确认无遗留任务"
+  },
+  "runs": [
+    {
+      "seed": 17,
+      "run_tag": "seed17",
+      "call_id": "fc-01M576Q5R38D2V163X91K2RJZ5",
+      "attempt_id": "1792317042-ad74133b",
+      "status": "finished",
+      "artifact": "/vol/s1/artifacts/seed17",
+      "artifact_manifest_sha256": "89d4802117688656b7b97485d59f5f59cbeb968abf0360d841a72baed64b74c2",
+      "adapter_sha256": "bbb1403edf60e93e840ae1ae0ed908cd240ff2d1298bfffa8cfc625271a7d231",
+      "steps": 7747,
+      "steps_expected": 7747,
+      "train_loss_cumulative_trainer_return": 0.46381047040674167,
+      "train_loss_last_50": 0.2875561733415384,
+      "loss_window_complete_50": true,
+      "trainer_secs": 15555.0,
+      "wall_secs": 15740.6,
+      "peak_gpu_gb": 6.53,
+      "health": "PASS",
+      "failures": [],
+      "wandb": {
+        "id": "ecd5pw27",
+        "url": "https://wandb.ai/<account>/rejev/runs/ecd5pw27",
+        "name": "rejev-s1-seed17"
+      },
+      "cost_usd_metered": 4.30145456,
+      "cost_source": "modal billing report --for today cumulative 8.57640748 − seed42 4.27495292",
+      "billing_note": "metered；账户状态不随发布集分发",
+      "adapter_config_sha256": "484093d899afe517b8778b9c461847a9773e25fa09c5478c11b615c021a83e26"
+    },
+    {
+      "seed": 29,
+      "run_tag": "seed29",
+      "call_id": "fc-01M57P15R7QW66DNN3Z1J268TH",
+      "attempt_id": "1792333099-1687106c",
+      "status": "finished",
+      "artifact": "/vol/s1/artifacts/seed29",
+      "artifact_manifest_sha256": "84fc8ec7fc42a7a2c4515ff2f9f9394d728a29a7959b5d00c7d30499f7c27a5f",
+      "adapter_sha256": "cb6ac86d13a82733b972a64c82218e4159f91750dfcba7d1ea3ac1b1b878ed6a",
+      "adapter_config_sha256": "7906377cc42e8907f849943d038479ea2e9222e0567c9186f20427f7a2a02bc7",
+      "steps": 7747,
+      "steps_expected": 7747,
+      "train_loss_cumulative_trainer_return": 0.4701559399887564,
+      "train_loss_last_50": 0.27045316737305086,
+      "loss_window_complete_50": true,
+      "trainer_secs": 15567.7,
+      "wall_secs": 15751.0,
+      "peak_gpu_gb": 6.6,
+      "health": "PASS",
+      "failures": [],
+      "wandb": {
+        "id": "d8cku50z",
+        "url": "https://wandb.ai/<account>/rejev/runs/d8cku50z",
+        "name": "rejev-s1-seed29"
+      },
+      "cost_usd_metered": 4.31092469,
+      "cost_source": "modal billing report --for today：train app 12.88733217 − seed42 4.27495292 − seed17 4.30145456",
+      "billing_note": "metered；账户状态不随发布集分发"
+    },
+    {
+      "seed": 41,
+      "run_tag": "seed41",
+      "call_id": "fc-01M585BVG421FX29N16TTXYFXC",
+      "attempt_id": "1792349177-1c9aeb4d",
+      "status": "finished",
+      "artifact": "/vol/s1/artifacts/seed41",
+      "artifact_manifest_sha256": "6aa6fb6bf0e1c4a0b7512b4d6758ced368070e0a93874e9abda41876d36134b5",
+      "adapter_sha256": "8227f9ac5bbf44bce26b324bceb57ad3bf84ed31a9ad5ee5fd0123cec6537f66",
+      "adapter_config_sha256": "d8839a4d37a197fe5858a71e246866ccfbaf31624668d68f3726ac93f27df6bc",
+      "steps": 7747,
+      "steps_expected": 7747,
+      "train_loss_cumulative_trainer_return": 0.49032529535733055,
+      "train_loss_last_50": 0.21500149694271387,
+      "loss_window_complete_50": true,
+      "trainer_secs": 15286.6,
+      "wall_secs": 15470.1,
+      "peak_gpu_gb": 6.61,
+      "health": "PASS",
+      "failures": [],
+      "wandb": {
+        "id": "tcyn90l0",
+        "url": "https://wandb.ai/<account>/rejev/runs/tcyn90l0",
+        "name": "rejev-s1-seed41"
+      },
+      "cost_usd_metered": 4.23096959,
+      "cost_source": "modal billing report --for today：train app 17.11830176 − 前 12.88733217",
+      "billing_note": "metered；账户状态不随发布集分发"
+    },
+    {
+      "seed": 42,
+      "run_tag": "seed42",
+      "call_id": "fc-01M56QKV4D66CPSJCNE8DDF12F",
+      "attempt_id": "1792301206-ffa7637a",
+      "status": "finished",
+      "artifact": "/vol/s1/artifacts/seed42",
+      "artifact_manifest_sha256": "d95ccb5b626eeacfbab2fa579804bad9d8b9acac088df1b83511a4af4815bebc",
+      "adapter_sha256": "87a0719456d69c7ac727cae0c23d4ca3937d27675daa656fd5df9dffe10bac2a",
+      "steps": 7747,
+      "steps_expected": 7747,
+      "train_loss_cumulative_trainer_return": 0.4542736835413261,
+      "train_loss_last_50": 0.2682484922881849,
+      "loss_window_complete_50": true,
+      "trainer_secs": 15476.6,
+      "wall_secs": 15646.2,
+      "peak_gpu_gb": 6.62,
+      "health": "PASS",
+      "failures": [],
+      "wandb": {
+        "id": "yfi4gjnp",
+        "url": "https://wandb.ai/<account>/rejev/runs/yfi4gjnp"
+      },
+      "cost_usd_metered": 4.27495292,
+      "cost_source": "modal billing report --for today（app ap-WsZNJPlzQ1VPPcrNWXz5hP）",
+      "billing_note": "metered；账户状态不随发布集分发",
+      "adapter_config_sha256": "e82417bff9391354f65446472f3f58e4187153b61e6bfe489a4c7cb0ff771215"
+    }
+  ],
+  "review": "评审归档不随本发布集分发",
+  "notes": [
+    "S1 仍未产生任何远程结果；本 manifest 在 seed42 启动前冻结，runs 随每臂完成追加。",
+    "混合训练数据留本地；仅上传到私有 Volume rejev。"
+  ],
+  "data_residency": "训练集位于 Modal 私有 Volume rejev（/vol/data/train-clean.jsonl），非公开；与 #111「混合训练数据留本地」的字面要求存在偏离，报告限制节披露。S1 入口自身不上传新数据。",
+  "run_identity": "run-identity.json 绑定 run_id/seed/数据 SHA/行数/模型/revision/模板 SHA/配方 SHA/RNG SHA/max_length/部署源码 SHA/plan SHA/S0 manifest SHA；code_commit 只作 provenance，不进身份；S1 manifest 不进身份（会随 runs 追加而变）。",
+  "trigger": "src/train/trigger_multiseed.py（deploy + spawn；实算 plan/S0/S1 SHA）",
+  "amendments": [
+    {
+      "date": "2026-10-18",
+      "item": "R1 P1-1",
+      "change": "运行身份改绑部署源码 SHA；code_commit 移出身份"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R1 P2-2",
+      "change": "删除含义模糊的 train_loss；cumulative 与 true last-50 分开命名"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R1 P2-3",
+      "change": "s1_manifest_sha256 必填并记录；不进身份"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R1 P2-5",
+      "change": "训练心跳 /vol/s1/heartbeats/{run_tag}.json；SIGKILL 后仍留最后进度"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R1 P2-9",
+      "change": "data_residency 披露：训练集在 Modal 私有 Volume，与字面“留本地”偏离"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R1 P3-10",
+      "change": "S0 manifest 关闭 set_seed_timing 保留项；S0 SHA 更新"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R2 P1-1",
+      "change": "训练步 loss 改为同一步求和；父类返回值已归一"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R2 P1-2",
+      "change": "已完成产物损坏时停止，不自动覆盖首次运行"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R2 P2-3",
+      "change": "loss_window 先写后标记；验证连续/有限/步号；不足 50 步记 null"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R2 P2-4",
+      "change": "checkpoint 必需 rng_state.pth；校验 trainer_state.global_step"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R2 P2-5",
+      "change": "run_id 进身份；trash/staging 移出 artifact 根并加 uuid"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R2 P2-6",
+      "change": "plan/S0 SHA 进身份；远端镜像内自校验三份冻结件；commit 必须 40 位 hex"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R2 P2-7",
+      "change": "attempts 记录 + failure 带 call_id；重依赖导入移入 try"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R3 P0",
+      "change": "on_save 先查 Trainer 文件，写窗口后再查完整清单；修复首次 checkpoint 必失败"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R3 P2",
+      "change": "validate_step_losses 校验整数步号/连续/每步贡献数量；短窗口拒绝"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R3 P2",
+      "change": "attempts/failures 改按 run_tag 子目录；attempt 在重依赖导入前写；幂等返回记 finished_reused"
+    },
+    {
+      "date": "2026-10-18",
+      "item": "R3 P3",
+      "change": "run_health.loss_window 旧文案同步更正；cumulative 续跑限制登记"
+    }
+  ],
+  "artifact_integrity": "已完成产物（art 存在但 manifest 不可解析或产物 SHA 不符）**自动停止**，不从头重训覆盖首次完整运行；完整重训必须用显式 retrain tag 并计入重训次数/预算。",
+  "attempts": "/vol/s1/attempts/{run_tag}/{attempt_id}.json：重工作前写 started，源码校验后 source_ok，identity 后 identity_ok，成功 finished / 幂等复用 finished_reused / 失败 failed；失败记录 /vol/s1/failures/{run_tag}/*.json；平台 SIGKILL 时至少留下 started 与最后心跳。",
+  "rng_note": "SFTConfig(seed) 本身不直接采样；Trainer.__init__ 的 set_seed(args.seed) 设置全局 RNG 后，RandomSampler 使用该状态。四臂同机制。",
+  "attempt_reconciliation": "trigger 把 call_id/五个 SHA 写入 <run-ledger>.csv；每臂结束用 modal app list + billing summary 核销；没有 finished 记录（SIGKILL/超时）的 attempt 由下一次运行或所有者复核，不当作已完成。",
+  "local_precheck": {
+    "date": "2026-10-18",
+    "rows": 30987,
+    "max_len": 1493,
+    "over_2048": 0,
+    "bad": 0,
+    "method": "本地 tokenizer 按 S1Trainer 同模板全量扫描 30,987 行：长度 ≤2048、单 BOS、字母 token id A→54…X→77、监督 span 恰为答案+<|im_end|>",
+    "eval2": {
+      "dev2": {
+        "rows": 500,
+        "max_len": 1478,
+        "over_max": 0
+      },
+      "calibration2": {
+        "rows": 1500,
+        "max_len": 1481,
+        "over_max": 0
+      },
+      "test2": {
+        "rows": 3800,
+        "max_len": 1483,
+        "over_max": 0
+      },
+      "test2_permuted": {
+        "rows": 3800,
+        "max_len": 1483,
+        "over_max": 0
+      },
+      "method": "本地 tokenizer + S1Trainer 同模板；prompt < 2048、label A..、answer_key 必填"
+    }
+  },
+  "modal_preflight": {
+    "date": "2026-10-18",
+    "note": "启动前按既定边界核对账户、活动任务、额度、时限与停止方法（账户状态不随发布集分发）",
+    "train_clean_volume_sha256": "bce0ae242975f23854a34341a11275de4cec2f7ec5d889cc3f726c78fe5b664d",
+    "train_clean_volume_note": "`modal volume get -` 的 stdout 会混入字节；SHA 以落盘文件复核",
+    "eval2_remote_path": "/vol/data/eval2/records/",
+    "eval2_uploaded_sha256": {
+      "dev2": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+      "calibration2": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+      "test2": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5",
+      "test2_permuted": "184f02bb39d87975d910eac35729eee2e31c76437189430495a0e9e8bd7114ef"
+    },
+    "timeout_sec": 21600,
+    "stop_method": "modal app stop -y <app-id>"
+  },
+  "known_p3": [
+    {
+      "item": "freeze-manifest 自指 SHA 锁定偏弱；--check 不比对 notes 字节",
+      "status": "registered; not blocking S1; before S2"
+    },
+    {
+      "item": "patch barrier 冻结侧阳性对照抽样池会随 temp 清单缩小",
+      "status": "registered; fail-closed+负控+主跑合链"
+    },
+    {
+      "item": "render_contract builder 常量侧未归属字段；gate_checks_note 位置",
+      "status": "registered; not blocking S1"
+    },
+    {
+      "item": "plan 半句、评审归档中的一处 2,301、内部状态板历史快照",
+      "status": "registered; not blocking S1"
+    },
+    {
+      "item": "builder 对 009-rebuild-evidence.json 的目录硬编码",
+      "status": "registered; 换 --output 需先重跑 evidence"
+    }
+  ],
+  "run_schedule": [
+    "seed42",
+    "seed17",
+    "seed29",
+    "seed41"
+  ],
+  "concurrency": "训练串行：max_containers=1；每臂结束后核验再触发下一臂",
+  "reference_arms": {
+    "base-c0": {
+      "model_kind": "base",
+      "adapter_sha256": null,
+      "adapter_config_sha256": null
+    },
+    "hist": {
+      "model_kind": "adapter",
+      "artifact": "/vol/artifacts/clean-r16",
+      "adapter_sha256": "294b07beac96e42e4a69af41c1121bc2aa0a18cf4634ef2ea9e17b8032b9973e",
+      "adapter_config_sha256": "bf854ccc2b799e70aa73ceeffb9d0bf48ea7a4df81b19c51f434ee56db475cc1"
+    }
+  },
+  "eval_code_sha256": {
+    "eval_candidates.py": "a4986792c8656a139bf3293905576d8f15ac97e66696ea46723df568ea3eefb4",
+    "candidate_math.py": "0a714e1797400320c860aa87a2a8d82edc31a065bae9977cf504aa507e4647d2",
+    "jsonl_resume.py": "d055f1f88471c06ca3e6392178303615f83e4ea6401e29b448c4e406bfb68f5c",
+    "s1_spec.py": "734068aaed2426c397899e7c88e55855a36ed516b392ec09b40433dad6a833fc",
+    "s1_analysis.py": "f93424a74c64e09efed99d15a953109563e4a1cfedfe3b4c085731ca62bb1f69",
+    "metrics.py": "30d4b575fe23798bd571a4b0cba0bae31f0cd4b1eb5c0892ca18074b50b5f8dd",
+    "check_eval2_render.py": "dbb7aa2f9b87c7d0b92aa66260375808ef1d18ad77e1f8a92696694b746dcf92",
+    "trigger_eval.py": "04b138c95af30de08011a3f4ab55646c71e88b659ea2efe92ca86d655fe1fc0b"
+  }
+}

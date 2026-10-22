@@ -20,9 +20,9 @@ abstract: >-
 authors:
   - family-names: "Joe-rq"
     alias: "Joe-rq"
-version: "v1.0.2"
-# date-released: v1.0.2（批次 ⑤ 评审带回的八条措辞修正）于 2026-10-04 发布；v1.0.1（报告第三批修正后的重导版本）于 2026-10-03 发布；v1.0.0（首个正式 Release，含技术报告）于 2026-09-29 发布；本仓首次代码公开发布为 2026-09-27（无 Release、不含技术报告）。
-date-released: "2026-10-04"
+version: "v1.2.1"
+date-released: "2026-10-22"
+# date-released 说明：v1.2.1（报告修订与公开集同步）于 2026-10-22 只 push GitHub main 发布，不打 tag、不建 Release、不产生新 DOI；v1.0.2（八条措辞修正）于 2026-10-04 发布；v1.0.1（报告第三批修正后的重导版本）于 2026-10-03 发布；v1.0.0（首个正式 Release，含技术报告）于 2026-09-29 发布；本仓首次代码公开发布为 2026-09-27（无 Release、不含技术报告）。
 license: MIT
 type: software
 repository-code: "https://github.com/Joe-rq/ReJev"
@@ -33,7 +33,7 @@ doi: 10.5281/zenodo.23036350
 identifiers:
   - type: doi
     value: 10.5281/zenodo.23036350
-    description: "Concept DOI — resolves to the latest version"
+    description: "Concept DOI — resolves to the latest Zenodo snapshot (v1.0.2); v1.2.1 is published on GitHub only"
   - type: doi
     value: 10.5281/zenodo.23036903
     description: "Version DOI — v1.0.0 snapshot"

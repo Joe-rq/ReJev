@@ -79,6 +79,19 @@ def load_jsonl(path: Path) -> list[dict]:
     return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l]
 
 
+def _state_of(rec):
+    """顶层 `state`；否则从 `messages` 里 user 角色的 JSON 题面取（与 verify_exam_overlap 同口径）。"""
+    if "state" in rec:
+        return rec["state"]
+    for m in rec.get("messages", []):
+        if m.get("role") == "user":
+            try:
+                return json.loads(m["content"]).get("state")
+            except (json.JSONDecodeError, AttributeError):
+                return None
+    return None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--exam-dir", default=None,
@@ -195,7 +208,14 @@ def main() -> int:
             leak_missing.append(f"{name}（{rel_path}）")
             continue
         d = load_jsonl(path)
-        d_sh = {statehash(r["state"]) for r in d if "state" in r}
+        # ⚠️ 2026-10-20（#128 PR1 R9）：`tev1-paper` 的记录**没有顶层 `state`**
+        # （state 嵌在 messages 的 user JSON 里），原先的 `if "state" in r` 会让
+        # statehash 口径对它恒为空集、把「空真」报成 0 命中。改用同一套回退取 state，
+        # 并断言全覆盖（取不到就炸，不静默跳过）。
+        d_states = [_state_of(r) for r in d]
+        n_no_state = sum(1 for s in d_states if s is None)
+        assert n_no_state == 0, f"{name}: {n_no_state} 条取不到 state，statehash 口径会空转"
+        d_sh = {statehash(s) for s in d_states}
         d_ids = {r["id"] for r in d if "id" in r}
         leak[name] = {"n": len(d), "statehash": len(exam_sh & d_sh), "id": len(exam_ids & d_ids)}
         assert not (leak[name]["statehash"] or leak[name]["id"]), f"{name} 重叠：{leak[name]}"

@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "final_dir": "data/eval2-final-20261017",
+  "check2_dir": "data/eval2-final-check2",
+  "final": {
+    "dev2": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+    "calibration2": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+    "test2": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5"
+  },
+  "check2": {
+    "dev2": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+    "calibration2": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+    "test2": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5"
+  },
+  "byte_identical": true,
+  "note": "逐文件 SHA256 实测；同一脚本版本 final ↔ final-check2。"
+}

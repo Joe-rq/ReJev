@@ -1,0 +1,52 @@
+{
+  "source": "data/eval2-final-20261017/records/test2.jsonl",
+  "source_sha256": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5",
+  "source_rows": 3800,
+  "output": "data/eval2-final-20261017/records/test2-permuted.jsonl",
+  "output_sha256": "184f02bb39d87975d910eac35729eee2e31c76437189430495a0e9e8bd7114ef",
+  "output_rows": 3800,
+  "rule": "shift = 1 + (int(sha256(id.encode('utf-8')),16) mod (n_options-1)); left rotation options[shift:]+options[:shift]; relabel A..; semantic key & description preserved",
+  "frozen_at": "2026-10-18",
+  "shift_counts": {
+    "1": 1637,
+    "2": 1288,
+    "3": 292,
+    "4": 238,
+    "5": 67,
+    "6": 42,
+    "7": 54,
+    "8": 14,
+    "9": 19,
+    "10": 19,
+    "11": 13,
+    "12": 8,
+    "13": 8,
+    "14": 9,
+    "15": 12,
+    "16": 11,
+    "17": 5,
+    "18": 9,
+    "19": 11,
+    "20": 13,
+    "21": 8,
+    "22": 13,
+    "23": 10
+  },
+  "option_count_counts": {
+    "2": 332,
+    "3": 2045,
+    "4": 122,
+    "5": 666,
+    "6": 116,
+    "8": 201,
+    "12": 106,
+    "24": 212
+  },
+  "invariants": {
+    "ids_unique": true,
+    "keyset_preserved": true,
+    "answer_key_preserved": true,
+    "answer_label_maps_to_answer_key": true,
+    "labels_contiguous_A": true
+  }
+}

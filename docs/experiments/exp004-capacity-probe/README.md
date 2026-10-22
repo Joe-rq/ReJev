@@ -5,7 +5,7 @@
 
 ![三次运行的训练 loss](../fig3_trainloss.png)
 
-*三次运行的训练 loss（本实验为 r64 一臂，曲线上只画 run 均值）；图上数字的口径与正本见[技术报告 §1.3](../../report/technical-report.zh-CN.md)。*
+*三次运行的训练 loss（本实验为 r64 一臂，曲线上只画 run 均值）；图上数字的口径与正本见[技术报告 §2.3](../../report/technical-report.zh-CN.md)。*
 
 ## 问题与判据（预注册，训前锁定）
 

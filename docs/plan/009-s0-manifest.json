@@ -1,0 +1,3598 @@
+{
+  "schema_version": 1,
+  "created": "2026-10-17T16:50:15.732251+00:00",
+  "updated": "2026-10-18",
+  "amended_note": "S0 冻结后按评审增补登记/审计字段；records 与冻结清单 SHA 未变。2026-10-18 补 pool_draws_registered 与 consumed_versions.final（R4 P3-1）。 2026-10-18 补 pool_draws_registered 与 consumed_versions.final（R4 P3-1）；同日关闭 set_seed_timing 保留项；更正 loss_window/run_health.loss_window 口径与 cuda 种子措辞。",
+  "tag": "final",
+  "output": "data/eval2-final-20261017",
+  "data_location": "本地数据目录（不入库）；本 manifest 记录文件 SHA256",
+  "route": "A2′：训练集＝历史 train-clean；只换 SEED 重建评测侧三切分",
+  "seed": "rejev-eval2-20261017-1",
+  "roles": {
+    "train": "历史 train-clean（30,987，完整 SHA 见 training_data），不重建",
+    "dev2": "实现诊断、吞吐预试验；不择优 checkpoint",
+    "calibration2": "逐臂拟合单一标量温度 T_a；不用于终评",
+    "test2": "冻结后一次性终评；不训练、不调参、不拟合温度"
+  },
+  "training_data": {
+    "path": "data/clean/train-clean.jsonl",
+    "sha256": "bce0ae242975f23854a34341a11275de4cec2f7ec5d889cc3f726c78fe5b664d",
+    "rows": 30987,
+    "role": "seed 42/17/29/41 训练集；原样复用，不重建",
+    "note": "本文件在 data/（gitignore）下；此字段是仓内可追踪的完整 SHA。"
+  },
+  "upstream": {
+    "repo": "togethercomputer/tev1",
+    "commit": "1dde7782382c9f49d627153759b8d1deab426ce0",
+    "patch": "src/data/upstream_patches/0001-rejev-s0.patch",
+    "patch_sha256": "0b210096eac05774c7ae3d19be0b4c8d617df1f980ed9dd6339c8f6afda40d1e",
+    "patched_dir": "<patched-dir>",
+    "patched_dir_note": "临时副本；按 patch + 上游 commit 可重建",
+    "patched_file_sha256": {
+      "build_dataset.py": "32dc493193f43aac34fe672e070639d643d3a40d2af791d25bc3b9056a490a43",
+      "build_v2.py": "4b9011dd74229bfa9e160bf368edf62a52f343f196a613ea4229536b4db02633",
+      "build_v21.py": "f1751d85404821836035d8c8b5b027ffce1d4e11f29c30838d9bfdef3438ff3d",
+      "build_new_v1.py": "3c78dabfdf69859c570479ab2c731ae3668436b31d66bd1f26b8b65ae96545b4"
+    },
+    "env": {
+      "python": "3.14.3",
+      "datasets": "4.8.5",
+      "transformers": "5.17.0",
+      "hf_home": "<tev1-dir>/hf-cache",
+      "env_note": "S0 只用 datasets 读取公开源；此处记录数据构建环境。S1 训练环境按 §3.2 另锁 transformers==5.6.2 与镜像。"
+    }
+  },
+  "render_contract": {
+    "model": "openbmb/MiniCPM5-2B",
+    "revision": "12a3808a956f869c767195e9266b59c4d21d92e2",
+    "tokenizer_note": "MiniCPM5-2B tokenizer（非上游 tev1 的 Qwen tokenizer）",
+    "template": "apply_chat_template(..., enable_thinking=False)",
+    "assistant_suffix": "<|im_start|>assistant\n<think>\n\n</think>\n\n",
+    "assistant_end": "<|im_end|>",
+    "eos_token": "</s>",
+    "eos_token_id": 1,
+    "im_end_token_id": 130073,
+    "letters": "ABCDEFGHIJKLMNOPQRSTUVWX",
+    "label_token_ids": {
+      "A": [
+        54
+      ],
+      "B": [
+        55
+      ],
+      "C": [
+        56
+      ],
+      "D": [
+        57
+      ],
+      "E": [
+        58
+      ],
+      "F": [
+        59
+      ],
+      "G": [
+        60
+      ],
+      "H": [
+        61
+      ],
+      "I": [
+        62
+      ],
+      "J": [
+        63
+      ],
+      "K": [
+        64
+      ],
+      "L": [
+        65
+      ],
+      "M": [
+        66
+      ],
+      "N": [
+        67
+      ],
+      "O": [
+        68
+      ],
+      "P": [
+        69
+      ],
+      "Q": [
+        70
+      ],
+      "R": [
+        71
+      ],
+      "S": [
+        72
+      ],
+      "T": [
+        73
+      ],
+      "U": [
+        74
+      ],
+      "V": [
+        75
+      ],
+      "W": [
+        76
+      ],
+      "X": [
+        77
+      ]
+    },
+    "max_tokens": 2048,
+    "generation_config_eos": [
+      1,
+      130073
+    ],
+    "sampling": "推理须显式 temperature=0 / do_sample=False",
+    "measured_env": {
+      "python": "3.14.3",
+      "transformers": "5.6.2"
+    },
+    "label_ids_source": "实测 2026-10-18（AutoTokenizer, local_files_only=True）；输出 docs/plan/009-render-contract.json",
+    "sources": [
+      "src/align/v1a-report.md",
+      "src/data/render.py"
+    ],
+    "note": "S0 只登记渲染契约；S1 渲染时须逐条断言字母单 token、序列长度 ≤ max_tokens、add_special_tokens=False。",
+    "measured_at": "2026-10-18",
+    "command": "python src/data/verify_render_contract.py",
+    "single_token": true,
+    "measured_fields": [
+      "label_token_ids",
+      "eos_token",
+      "eos_token_id",
+      "im_end_token_id",
+      "single_token"
+    ],
+    "from_report": {
+      "generation_config_eos": "src/align/v1a-report.md C6",
+      "sampling": "src/align/v1a-report.md C6",
+      "assistant_suffix": "src/align/v1a-report.md C3",
+      "max_tokens": "src/data/render.py MAX_TOKENS"
+    }
+  },
+  "patch_barrier": {
+    "status": "PASS",
+    "patched_dir": "<patched-dir>",
+    "patch_sha256": "0b210096eac05774c7ae3d19be0b4c8d617df1f980ed9dd6339c8f6afda40d1e",
+    "frozen_statehashes_sha256": "432eb8ef7183d1ed23b0c7401a98cf4de570e2f344b1ead6633a4630d88cb622",
+    "counts": {
+      "train": 6000,
+      "dev": 1000,
+      "calibration": 1000,
+      "test": 1000
+    },
+    "expected_counts": {
+      "train": 6000,
+      "dev": 1000,
+      "calibration": 1000,
+      "test": 1000
+    },
+    "frozen_hits": {
+      "train": 0,
+      "dev": 0,
+      "calibration": 0,
+      "test": 0
+    },
+    "fail_closed": true,
+    "negative_control": {
+      "status": "PASS",
+      "target_source": "mnli",
+      "target_statehash": "f146a326c6d1317102cfe59b5dd554854e7104ca79a724cdef8b4c6d2c510f05",
+      "target_hits_in_dev_cal_test": {
+        "dev": 0,
+        "calibration": 0,
+        "test": 0
+      },
+      "note": "把一个已知公开 test state 放进 old，再跑 public_data；该 statehash 被 forbidden 排除。"
+    },
+    "positive_control_frozen_list": {
+      "status": "PASS",
+      "target_statehash": "f146a326c6d1317102cfe59b5dd554854e7104ca79a724cdef8b4c6d2c510f05",
+      "target_hits_in_dev_cal_test": {
+        "dev": 0,
+        "calibration": 0,
+        "test": 0
+      },
+      "note": "把同一 statehash 写进临时冻结清单，再跑 public_data；证明 frozen_statehashes 的清单侧路径被使用。"
+    },
+    "note": "public_data 生成的 9,000 行全部不命中冻结清单；缺 env 时明确报错；负控（old 侧）与阳性对照（冻结清单侧）均证明屏障在排除已知 state。"
+  },
+  "statehash_note": "S1 泄漏检查用 freeze_history.statehash（与上游 build_v2 逐字一致）；不要用 render.statehash（ensure_ascii=False，对非 ASCII 不同）。",
+  "frozen": {
+    "dir": "src/data/frozen",
+    "statehashes_sha256": "432eb8ef7183d1ed23b0c7401a98cf4de570e2f344b1ead6633a4630d88cb622",
+    "statehashes": 50914,
+    "families_sha256": "956d5b78aa29ba13899f642095698873f168de138052566fc8ec983cb8b45164",
+    "families": 25672,
+    "manifest_sha256": "b10a1ecaecb14db0116cd1862bc340f116eef68bbeadc69f9dd4495a7d4ebaf4",
+    "derived_minus_covered": 0
+  },
+  "rebuild_evidence_check": {
+    "status": "PASS",
+    "final_dir": "data/eval2-final-20261017",
+    "check2_dir": "data/eval2-final-check2",
+    "final": {
+      "dev2": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+      "calibration2": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+      "test2": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5"
+    },
+    "check2": {
+      "dev2": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+      "calibration2": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+      "test2": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5"
+    },
+    "byte_identical": true,
+    "note": "逐文件 SHA256 实测；同一脚本版本 final ↔ final-check2。"
+  },
+  "consumed_versions": [
+    {
+      "tag": "probe",
+      "seed": "rejev-eval2-probe-20261017",
+      "dir": "data/eval2-probe-20261017",
+      "status": "PASS-not-delivered",
+      "note": "配额/审计预演；其 held-out 抽取已消耗，不再使用"
+    },
+    {
+      "tag": "final-check",
+      "seed": "rejev-eval2-20261017-1",
+      "dir": "data/eval2-final-check",
+      "status": "obsolete-intermediate",
+      "note": "脚本改动前（b28e09f 之前）的中间产物；已作废，不用于确定性证明"
+    },
+    {
+      "tag": "final-check2",
+      "seed": "rejev-eval2-20261017-1",
+      "dir": "data/eval2-final-check2",
+      "status": "reproducibility-check",
+      "note": "与交付版同一脚本版本；逐字节一致"
+    },
+    {
+      "tag": "final",
+      "seed": "rejev-eval2-20261017-1",
+      "dir": "data/eval2-final-20261017",
+      "status": "delivered",
+      "note": "交付版；与 final-check2 逐字节一致，不重复计为独立抽取"
+    }
+  ],
+  "rebuild_evidence": [
+    {
+      "dir": "data/eval2-final-20261017",
+      "created": "2026-10-17T15:56:04Z",
+      "tag": "final",
+      "sha256": {
+        "records/dev2.jsonl": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+        "records/calibration2.jsonl": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+        "records/test2.jsonl": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5"
+      },
+      "note": "交付版"
+    },
+    {
+      "dir": "data/eval2-final-check2",
+      "created": "2026-10-17T15:56:23Z",
+      "tag": "final-recheck",
+      "sha256": {
+        "records/dev2.jsonl": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+        "records/calibration2.jsonl": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+        "records/test2.jsonl": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5"
+      },
+      "note": "与交付版同一脚本版本；三文件逐字节一致"
+    },
+    {
+      "dir": "data/eval2-final-check",
+      "created": "2026-10-17T15:49:28Z",
+      "tag": "final-recheck",
+      "sha256": {
+        "records/dev2.jsonl": "005aff6c85f79d16348815ef3f706aa79ad45d64fd2537a38e3b3889284c8ad6",
+        "records/calibration2.jsonl": "8c5a3b90fd7ad33d3a7fa58b020afea3d5ad63d504c4c68e1991226e9afd7ca7",
+        "records/test2.jsonl": "96113c64a6ed95d4fb0710cdb55a5227d69cfa83a019336d0610851e4f9beaa5"
+      },
+      "note": "脚本改动前的中间产物；已作废，不用于确定性证明"
+    }
+  ],
+  "quotas": {
+    "dev2": {
+      "policy_v2": 174,
+      "routing_v2": 84,
+      "policy": 24,
+      "research_taxonomy_v21": 56,
+      "mnli": 74,
+      "boolq": 45,
+      "banking77": 43
+    },
+    "calibration2": {
+      "policy_v2": 522,
+      "routing_v2": 264,
+      "policy": 66,
+      "research_taxonomy_v21": 168,
+      "mnli": 218,
+      "boolq": 131,
+      "banking77": 131
+    },
+    "test2": {
+      "policy_v2": 1326,
+      "routing_v2": 666,
+      "policy": 165,
+      "research_taxonomy_v21": 424,
+      "mnli": 554,
+      "boolq": 332,
+      "banking77": 333
+    }
+  },
+  "source_allocation": {
+    "public": "官方 held-out：mnli validation_matched + validation_mismatched、boolq validation、banking77 test；扣冻结历史 statehash 后按 label 均衡抽取",
+    "synthetic": "按 split 命名空间（dev2/calibration2/test2）用 patched 生成器新生成；按 family 整组"
+  },
+  "budget": {
+    "cap_usd_credit": 30,
+    "breakdown_usd": {
+      "training_4_arms": 15.4,
+      "test2_six_arms_eval": 2.3,
+      "calibration2_dev2": 1.2,
+      "permutation_and_extra_inference": [
+        3,
+        5
+      ]
+    },
+    "point_estimate_usd": [
+      22,
+      24
+    ],
+    "with_reserve_usd": 26,
+    "with_one_retrain_usd": 27,
+    "with_two_retrains_usd": 31,
+    "stop_condition": "实际已花＋预计超过 $30 credit 即停并修订方案；不静默缩评测或省一臂",
+    "accounting": "S1 逐臂记账；每次远程运行前实时核对 credit/spend limit/活动任务，结束后核对 Modal 实际账单并确认无遗留任务"
+  },
+  "public_pool_audits": {
+    "mnli": {
+      "raw_rows": 19647,
+      "unique_states": 6667,
+      "frozen_statehash_hits": 550,
+      "available": 6117,
+      "official_splits": [
+        "validation_matched",
+        "validation_mismatched"
+      ],
+      "dedup_policy": "first-wins in official_splits order",
+      "consumed_by_delivery": 846,
+      "remaining_after_delivery": 5271,
+      "draws_from_pool": 3,
+      "remaining_after_all_consumed_lower_bound": 3579,
+      "pool_draws_registered": [
+        "probe",
+        "final-check",
+        "final"
+      ],
+      "pool_draws_note": "final-check2 ≡ final（同一脚本版本逐字节一致），不重复计为第 4 次抽取"
+    },
+    "boolq": {
+      "raw_rows": 3270,
+      "unique_states": 2932,
+      "frozen_statehash_hits": 400,
+      "available": 2532,
+      "official_splits": [
+        "validation"
+      ],
+      "dedup_policy": "first-wins in official_splits order",
+      "consumed_by_delivery": 508,
+      "remaining_after_delivery": 2024,
+      "draws_from_pool": 3,
+      "remaining_after_all_consumed_lower_bound": 1008,
+      "pool_draws_registered": [
+        "probe",
+        "final-check",
+        "final"
+      ],
+      "pool_draws_note": "final-check2 ≡ final（同一脚本版本逐字节一致），不重复计为第 4 次抽取"
+    },
+    "banking77": {
+      "raw_rows": 3080,
+      "unique_states": 3076,
+      "frozen_statehash_hits": 400,
+      "available": 2676,
+      "official_splits": [
+        "test"
+      ],
+      "dedup_policy": "first-wins in official_splits order",
+      "label_names": [
+        "activate_my_card",
+        "age_limit",
+        "apple_pay_or_google_pay",
+        "atm_support",
+        "automatic_top_up",
+        "balance_not_updated_after_bank_transfer",
+        "balance_not_updated_after_cheque_or_cash_deposit",
+        "beneficiary_not_allowed",
+        "cancel_transfer",
+        "card_about_to_expire",
+        "card_acceptance",
+        "card_arrival",
+        "card_delivery_estimate",
+        "card_linking",
+        "card_not_working",
+        "card_payment_fee_charged",
+        "card_payment_not_recognised",
+        "card_payment_wrong_exchange_rate",
+        "card_swallowed",
+        "cash_withdrawal_charge",
+        "cash_withdrawal_not_recognised",
+        "change_pin",
+        "compromised_card",
+        "contactless_not_working",
+        "country_support",
+        "declined_card_payment",
+        "declined_cash_withdrawal",
+        "declined_transfer",
+        "direct_debit_payment_not_recognised",
+        "disposable_card_limits",
+        "edit_personal_details",
+        "exchange_charge",
+        "exchange_rate",
+        "exchange_via_app",
+        "extra_charge_on_statement",
+        "failed_transfer",
+        "fiat_currency_support",
+        "get_disposable_virtual_card",
+        "get_physical_card",
+        "getting_spare_card",
+        "getting_virtual_card",
+        "lost_or_stolen_card",
+        "lost_or_stolen_phone",
+        "order_physical_card",
+        "passcode_forgotten",
+        "pending_card_payment",
+        "pending_cash_withdrawal",
+        "pending_top_up",
+        "pending_transfer",
+        "pin_blocked",
+        "receiving_money",
+        "Refund_not_showing_up",
+        "request_refund",
+        "reverted_card_payment?",
+        "supported_cards_and_currencies",
+        "terminate_account",
+        "top_up_by_bank_transfer_charge",
+        "top_up_by_card_charge",
+        "top_up_by_cash_or_cheque",
+        "top_up_failed",
+        "top_up_limits",
+        "top_up_reverted",
+        "topping_up_by_card",
+        "transaction_charged_twice",
+        "transfer_fee_charged",
+        "transfer_into_account",
+        "transfer_not_received_by_recipient",
+        "transfer_timing",
+        "unable_to_verify_identity",
+        "verify_my_identity",
+        "verify_source_of_funds",
+        "verify_top_up",
+        "virtual_card_not_working",
+        "visa_or_mastercard",
+        "why_verify_identity",
+        "wrong_amount_of_cash_received",
+        "wrong_exchange_rate_for_cash_withdrawal"
+      ],
+      "consumed_by_delivery": 507,
+      "remaining_after_delivery": 2169,
+      "draws_from_pool": 3,
+      "remaining_after_all_consumed_lower_bound": 1155,
+      "pool_draws_registered": [
+        "probe",
+        "final-check",
+        "final"
+      ],
+      "pool_draws_note": "final-check2 ≡ final（同一脚本版本逐字节一致），不重复计为第 4 次抽取"
+    }
+  },
+  "semantic_label_sets": {
+    "mnli": [
+      "contradicted",
+      "entailed",
+      "neutral"
+    ],
+    "boolq": [
+      "no",
+      "yes"
+    ],
+    "banking77": [
+      "Refund_not_showing_up",
+      "activate_my_card",
+      "age_limit",
+      "apple_pay_or_google_pay",
+      "atm_support",
+      "automatic_top_up",
+      "balance_not_updated_after_bank_transfer",
+      "balance_not_updated_after_cheque_or_cash_deposit",
+      "beneficiary_not_allowed",
+      "cancel_transfer",
+      "card_about_to_expire",
+      "card_acceptance",
+      "card_arrival",
+      "card_delivery_estimate",
+      "card_linking",
+      "card_not_working",
+      "card_payment_fee_charged",
+      "card_payment_not_recognised",
+      "card_payment_wrong_exchange_rate",
+      "card_swallowed",
+      "cash_withdrawal_charge",
+      "cash_withdrawal_not_recognised",
+      "change_pin",
+      "compromised_card",
+      "contactless_not_working",
+      "country_support",
+      "declined_card_payment",
+      "declined_cash_withdrawal",
+      "declined_transfer",
+      "direct_debit_payment_not_recognised",
+      "disposable_card_limits",
+      "edit_personal_details",
+      "exchange_charge",
+      "exchange_rate",
+      "exchange_via_app",
+      "extra_charge_on_statement",
+      "failed_transfer",
+      "fiat_currency_support",
+      "get_disposable_virtual_card",
+      "get_physical_card",
+      "getting_spare_card",
+      "getting_virtual_card",
+      "lost_or_stolen_card",
+      "lost_or_stolen_phone",
+      "none",
+      "order_physical_card",
+      "passcode_forgotten",
+      "pending_card_payment",
+      "pending_cash_withdrawal",
+      "pending_top_up",
+      "pending_transfer",
+      "pin_blocked",
+      "receiving_money",
+      "request_refund",
+      "reverted_card_payment?",
+      "supported_cards_and_currencies",
+      "terminate_account",
+      "top_up_by_bank_transfer_charge",
+      "top_up_by_card_charge",
+      "top_up_by_cash_or_cheque",
+      "top_up_failed",
+      "top_up_limits",
+      "top_up_reverted",
+      "topping_up_by_card",
+      "transaction_charged_twice",
+      "transfer_fee_charged",
+      "transfer_into_account",
+      "transfer_not_received_by_recipient",
+      "transfer_timing",
+      "unable_to_verify_identity",
+      "verify_my_identity",
+      "verify_source_of_funds",
+      "verify_top_up",
+      "virtual_card_not_working",
+      "visa_or_mastercard",
+      "why_verify_identity",
+      "wrong_amount_of_cash_received",
+      "wrong_exchange_rate_for_cash_withdrawal"
+    ],
+    "policy": [
+      "eligible",
+      "ineligible",
+      "unknown"
+    ],
+    "policy_v2": [
+      "eligible",
+      "ineligible",
+      "unknown"
+    ],
+    "routing_v2": [
+      "default",
+      "route_1",
+      "route_2",
+      "route_3",
+      "unknown"
+    ],
+    "research_taxonomy_v21": [
+      "agent-benchmarks",
+      "agent-skills",
+      "agent-training",
+      "audio-speech",
+      "coding-agents",
+      "data-curation",
+      "diffusion-lms",
+      "document-ocr",
+      "image-generation",
+      "interpretability-analysis",
+      "long-context",
+      "model-architecture",
+      "model-efficiency",
+      "reasoning-methods",
+      "research-automation",
+      "rl-for-reasoning",
+      "robot-policies",
+      "safety-alignment",
+      "science-medicine",
+      "search-agents",
+      "spatial-3d",
+      "video-generation",
+      "video-understanding",
+      "vlm-architectures"
+    ]
+  },
+  "coverage": {
+    "dev2": {
+      "boolq": {
+        "rows": 45,
+        "families": 45,
+        "option_counts": {
+          "2": 45
+        },
+        "families_by_option": {
+          "2": 45
+        }
+      },
+      "mnli": {
+        "rows": 74,
+        "families": 74,
+        "option_counts": {
+          "3": 74
+        },
+        "families_by_option": {
+          "3": 74
+        }
+      },
+      "routing_v2": {
+        "rows": 84,
+        "families": 14,
+        "option_counts": {
+          "5": 84
+        },
+        "families_by_option": {
+          "5": 14
+        }
+      },
+      "policy_v2": {
+        "rows": 174,
+        "families": 29,
+        "option_counts": {
+          "3": 174
+        },
+        "families_by_option": {
+          "3": 29
+        }
+      },
+      "banking77": {
+        "rows": 43,
+        "families": 43,
+        "option_counts": {
+          "4": 16,
+          "6": 10,
+          "8": 17
+        },
+        "families_by_option": {
+          "4": 16,
+          "6": 10,
+          "8": 17
+        }
+      },
+      "research_taxonomy_v21": {
+        "rows": 56,
+        "families": 7,
+        "option_counts": {
+          "8": 14,
+          "12": 14,
+          "24": 28
+        },
+        "families_by_option": {
+          "8": 7,
+          "12": 7,
+          "24": 7
+        }
+      },
+      "policy": {
+        "rows": 24,
+        "families": 8,
+        "option_counts": {
+          "3": 24
+        },
+        "families_by_option": {
+          "3": 8
+        }
+      }
+    },
+    "calibration2": {
+      "policy_v2": {
+        "rows": 522,
+        "families": 87,
+        "option_counts": {
+          "3": 522
+        },
+        "families_by_option": {
+          "3": 87
+        }
+      },
+      "routing_v2": {
+        "rows": 264,
+        "families": 44,
+        "option_counts": {
+          "5": 264
+        },
+        "families_by_option": {
+          "5": 44
+        }
+      },
+      "boolq": {
+        "rows": 131,
+        "families": 131,
+        "option_counts": {
+          "2": 131
+        },
+        "families_by_option": {
+          "2": 131
+        }
+      },
+      "mnli": {
+        "rows": 218,
+        "families": 218,
+        "option_counts": {
+          "3": 218
+        },
+        "families_by_option": {
+          "3": 218
+        }
+      },
+      "banking77": {
+        "rows": 131,
+        "families": 131,
+        "option_counts": {
+          "4": 46,
+          "6": 36,
+          "8": 49
+        },
+        "families_by_option": {
+          "4": 46,
+          "6": 36,
+          "8": 49
+        }
+      },
+      "research_taxonomy_v21": {
+        "rows": 168,
+        "families": 21,
+        "option_counts": {
+          "8": 42,
+          "12": 42,
+          "24": 84
+        },
+        "families_by_option": {
+          "8": 21,
+          "12": 21,
+          "24": 21
+        }
+      },
+      "policy": {
+        "rows": 66,
+        "families": 22,
+        "option_counts": {
+          "3": 66
+        },
+        "families_by_option": {
+          "3": 22
+        }
+      }
+    },
+    "test2": {
+      "policy_v2": {
+        "rows": 1326,
+        "families": 221,
+        "option_counts": {
+          "3": 1326
+        },
+        "families_by_option": {
+          "3": 221
+        }
+      },
+      "research_taxonomy_v21": {
+        "rows": 424,
+        "families": 53,
+        "option_counts": {
+          "8": 106,
+          "12": 106,
+          "24": 212
+        },
+        "families_by_option": {
+          "8": 53,
+          "12": 53,
+          "24": 53
+        }
+      },
+      "routing_v2": {
+        "rows": 666,
+        "families": 111,
+        "option_counts": {
+          "5": 666
+        },
+        "families_by_option": {
+          "5": 111
+        }
+      },
+      "mnli": {
+        "rows": 554,
+        "families": 554,
+        "option_counts": {
+          "3": 554
+        },
+        "families_by_option": {
+          "3": 554
+        }
+      },
+      "banking77": {
+        "rows": 333,
+        "families": 333,
+        "option_counts": {
+          "4": 122,
+          "6": 116,
+          "8": 95
+        },
+        "families_by_option": {
+          "4": 122,
+          "6": 116,
+          "8": 95
+        }
+      },
+      "boolq": {
+        "rows": 332,
+        "families": 332,
+        "option_counts": {
+          "2": 332
+        },
+        "families_by_option": {
+          "2": 332
+        }
+      },
+      "policy": {
+        "rows": 165,
+        "families": 55,
+        "option_counts": {
+          "3": 165
+        },
+        "families_by_option": {
+          "3": 55
+        }
+      }
+    }
+  },
+  "audits": {
+    "partition": {
+      "pairwise": {
+        "dev2_x_calibration2": {
+          "statehash_overlap": 0,
+          "family_overlap": 0
+        },
+        "dev2_x_test2": {
+          "statehash_overlap": 0,
+          "family_overlap": 0
+        },
+        "calibration2_x_test2": {
+          "statehash_overlap": 0,
+          "family_overlap": 0
+        }
+      },
+      "history": {
+        "frozen_statehashes": 50914,
+        "frozen_families": 25672,
+        "statehash_overlap": {
+          "dev2": 0,
+          "calibration2": 0,
+          "test2": 0
+        },
+        "family_overlap": {
+          "dev2": 0,
+          "calibration2": 0,
+          "test2": 0
+        },
+        "exam_family_check": "vacuous（exam 无 group_id，由 statehash 检查覆盖）"
+      },
+      "gate": "PASS"
+    },
+    "answer_position": {
+      "splits": {
+        "dev2": {
+          "answer_letter_counts": {
+            "A": 138,
+            "B": 140,
+            "C": 113,
+            "D": 35,
+            "E": 33,
+            "F": 8,
+            "G": 1,
+            "H": 8,
+            "I": 1,
+            "J": 8,
+            "K": 1,
+            "L": 3,
+            "O": 1,
+            "P": 2,
+            "Q": 1,
+            "R": 1,
+            "U": 1,
+            "W": 2,
+            "X": 3
+          },
+          "answer_letter_counts_by_source": {
+            "banking77": {
+              "A": 8,
+              "B": 9,
+              "C": 3,
+              "D": 10,
+              "E": 7,
+              "F": 4,
+              "H": 2
+            },
+            "boolq": {
+              "A": 25,
+              "B": 20
+            },
+            "mnli": {
+              "A": 23,
+              "B": 26,
+              "C": 25
+            },
+            "policy": {
+              "A": 7,
+              "B": 12,
+              "C": 5
+            },
+            "policy_v2": {
+              "A": 57,
+              "B": 56,
+              "C": 61
+            },
+            "research_taxonomy_v21": {
+              "A": 4,
+              "B": 5,
+              "C": 3,
+              "D": 3,
+              "E": 6,
+              "F": 4,
+              "G": 1,
+              "H": 6,
+              "I": 1,
+              "J": 8,
+              "K": 1,
+              "L": 3,
+              "O": 1,
+              "P": 2,
+              "Q": 1,
+              "R": 1,
+              "U": 1,
+              "W": 2,
+              "X": 3
+            },
+            "routing_v2": {
+              "A": 14,
+              "B": 12,
+              "C": 16,
+              "D": 22,
+              "E": 20
+            }
+          },
+          "position_balance": {
+            "banking77": {
+              "n": 43,
+              "max_letter": "D",
+              "observed_share": 0.232558,
+              "expected_share": 0.181202,
+              "delta_pp": 5.136,
+              "chi2": 8.624141,
+              "df": 7,
+              "z": null,
+              "p": null
+            },
+            "boolq": {
+              "n": 45,
+              "max_letter": "A",
+              "observed_share": 0.555556,
+              "expected_share": 0.5,
+              "delta_pp": 5.556,
+              "chi2": 0.555556,
+              "df": 1,
+              "z": 0.745,
+              "p": 0.456057
+            },
+            "mnli": {
+              "n": 74,
+              "max_letter": "B",
+              "observed_share": 0.351351,
+              "expected_share": 0.333333,
+              "delta_pp": 1.802,
+              "chi2": 0.189189,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "policy": {
+              "n": 24,
+              "max_letter": "B",
+              "observed_share": 0.5,
+              "expected_share": 0.333333,
+              "delta_pp": 16.667,
+              "chi2": 3.25,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "policy_v2": {
+              "n": 174,
+              "max_letter": "C",
+              "observed_share": 0.350575,
+              "expected_share": 0.333333,
+              "delta_pp": 1.724,
+              "chi2": 0.241379,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "research_taxonomy_v21": {
+              "n": 56,
+              "max_letter": "J",
+              "observed_share": 0.142857,
+              "expected_share": 0.041667,
+              "delta_pp": 10.119,
+              "chi2": 30.387755,
+              "df": 23,
+              "z": null,
+              "p": null
+            },
+            "routing_v2": {
+              "n": 84,
+              "max_letter": "D",
+              "observed_share": 0.261905,
+              "expected_share": 0.2,
+              "delta_pp": 6.19,
+              "chi2": 4.095238,
+              "df": 4,
+              "z": null,
+              "p": null
+            }
+          },
+          "multi_row_families": 58,
+          "family_variant_check_failures": 0
+        },
+        "calibration2": {
+          "answer_letter_counts": {
+            "A": 460,
+            "B": 407,
+            "C": 348,
+            "D": 76,
+            "E": 84,
+            "F": 21,
+            "G": 17,
+            "H": 15,
+            "I": 5,
+            "J": 10,
+            "K": 6,
+            "L": 7,
+            "M": 6,
+            "N": 1,
+            "O": 5,
+            "P": 3,
+            "Q": 3,
+            "R": 6,
+            "S": 2,
+            "T": 3,
+            "U": 3,
+            "V": 3,
+            "W": 6,
+            "X": 3
+          },
+          "answer_letter_counts_by_source": {
+            "banking77": {
+              "A": 28,
+              "B": 23,
+              "C": 21,
+              "D": 21,
+              "E": 19,
+              "F": 10,
+              "G": 6,
+              "H": 3
+            },
+            "boolq": {
+              "A": 72,
+              "B": 59
+            },
+            "mnli": {
+              "A": 79,
+              "B": 67,
+              "C": 72
+            },
+            "policy": {
+              "A": 20,
+              "B": 17,
+              "C": 29
+            },
+            "policy_v2": {
+              "A": 192,
+              "B": 176,
+              "C": 154
+            },
+            "research_taxonomy_v21": {
+              "A": 14,
+              "B": 6,
+              "C": 18,
+              "D": 11,
+              "E": 13,
+              "F": 11,
+              "G": 11,
+              "H": 12,
+              "I": 5,
+              "J": 10,
+              "K": 6,
+              "L": 7,
+              "M": 6,
+              "N": 1,
+              "O": 5,
+              "P": 3,
+              "Q": 3,
+              "R": 6,
+              "S": 2,
+              "T": 3,
+              "U": 3,
+              "V": 3,
+              "W": 6,
+              "X": 3
+            },
+            "routing_v2": {
+              "A": 55,
+              "B": 59,
+              "C": 54,
+              "D": 44,
+              "E": 52
+            }
+          },
+          "position_balance": {
+            "banking77": {
+              "n": 131,
+              "max_letter": "A",
+              "observed_share": 0.21374,
+              "expected_share": 0.180344,
+              "delta_pp": 3.34,
+              "chi2": 7.27761,
+              "df": 7,
+              "z": null,
+              "p": null
+            },
+            "boolq": {
+              "n": 131,
+              "max_letter": "A",
+              "observed_share": 0.549618,
+              "expected_share": 0.5,
+              "delta_pp": 4.962,
+              "chi2": 1.290076,
+              "df": 1,
+              "z": 1.136,
+              "p": 0.256034
+            },
+            "mnli": {
+              "n": 218,
+              "max_letter": "A",
+              "observed_share": 0.362385,
+              "expected_share": 0.333333,
+              "delta_pp": 2.905,
+              "chi2": 1.0,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "policy": {
+              "n": 66,
+              "max_letter": "C",
+              "observed_share": 0.439394,
+              "expected_share": 0.333333,
+              "delta_pp": 10.606,
+              "chi2": 3.545455,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "policy_v2": {
+              "n": 522,
+              "max_letter": "A",
+              "observed_share": 0.367816,
+              "expected_share": 0.333333,
+              "delta_pp": 3.448,
+              "chi2": 4.183908,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "research_taxonomy_v21": {
+              "n": 168,
+              "max_letter": "C",
+              "observed_share": 0.107143,
+              "expected_share": 0.072917,
+              "delta_pp": 3.423,
+              "chi2": 17.428571,
+              "df": 23,
+              "z": null,
+              "p": null
+            },
+            "routing_v2": {
+              "n": 264,
+              "max_letter": "B",
+              "observed_share": 0.223485,
+              "expected_share": 0.2,
+              "delta_pp": 2.348,
+              "chi2": 2.325758,
+              "df": 4,
+              "z": null,
+              "p": null
+            }
+          },
+          "multi_row_families": 174,
+          "family_variant_check_failures": 0
+        },
+        "test2": {
+          "answer_letter_counts": {
+            "A": 1069,
+            "B": 1069,
+            "C": 922,
+            "D": 202,
+            "E": 218,
+            "F": 68,
+            "G": 46,
+            "H": 46,
+            "I": 10,
+            "J": 8,
+            "K": 17,
+            "L": 18,
+            "M": 7,
+            "N": 4,
+            "O": 6,
+            "P": 13,
+            "Q": 11,
+            "R": 9,
+            "S": 9,
+            "T": 8,
+            "U": 13,
+            "V": 9,
+            "W": 9,
+            "X": 9
+          },
+          "answer_letter_counts_by_source": {
+            "banking77": {
+              "A": 57,
+              "B": 61,
+              "C": 63,
+              "D": 51,
+              "E": 39,
+              "F": 30,
+              "G": 17,
+              "H": 15
+            },
+            "boolq": {
+              "A": 190,
+              "B": 142
+            },
+            "mnli": {
+              "A": 168,
+              "B": 195,
+              "C": 191
+            },
+            "policy": {
+              "A": 59,
+              "B": 56,
+              "C": 50
+            },
+            "policy_v2": {
+              "A": 445,
+              "B": 430,
+              "C": 451
+            },
+            "research_taxonomy_v21": {
+              "A": 36,
+              "B": 30,
+              "C": 34,
+              "D": 26,
+              "E": 40,
+              "F": 38,
+              "G": 29,
+              "H": 31,
+              "I": 10,
+              "J": 8,
+              "K": 17,
+              "L": 18,
+              "M": 7,
+              "N": 4,
+              "O": 6,
+              "P": 13,
+              "Q": 11,
+              "R": 9,
+              "S": 9,
+              "T": 8,
+              "U": 13,
+              "V": 9,
+              "W": 9,
+              "X": 9
+            },
+            "routing_v2": {
+              "A": 114,
+              "B": 155,
+              "C": 133,
+              "D": 125,
+              "E": 139
+            }
+          },
+          "position_balance": {
+            "banking77": {
+              "n": 333,
+              "max_letter": "C",
+              "observed_share": 0.189189,
+              "expected_share": 0.18531,
+              "delta_pp": 0.388,
+              "chi2": 7.278956,
+              "df": 7,
+              "z": null,
+              "p": null
+            },
+            "boolq": {
+              "n": 332,
+              "max_letter": "A",
+              "observed_share": 0.572289,
+              "expected_share": 0.5,
+              "delta_pp": 7.229,
+              "chi2": 6.939759,
+              "df": 1,
+              "z": 2.634,
+              "p": 0.00843
+            },
+            "mnli": {
+              "n": 554,
+              "max_letter": "B",
+              "observed_share": 0.351986,
+              "expected_share": 0.333333,
+              "delta_pp": 1.865,
+              "chi2": 2.299639,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "policy": {
+              "n": 165,
+              "max_letter": "A",
+              "observed_share": 0.357576,
+              "expected_share": 0.333333,
+              "delta_pp": 2.424,
+              "chi2": 0.763636,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "policy_v2": {
+              "n": 1326,
+              "max_letter": "C",
+              "observed_share": 0.340121,
+              "expected_share": 0.333333,
+              "delta_pp": 0.679,
+              "chi2": 0.529412,
+              "df": 2,
+              "z": null,
+              "p": null
+            },
+            "research_taxonomy_v21": {
+              "n": 424,
+              "max_letter": "E",
+              "observed_share": 0.09434,
+              "expected_share": 0.072917,
+              "delta_pp": 2.142,
+              "chi2": 23.501348,
+              "df": 23,
+              "z": null,
+              "p": null
+            },
+            "routing_v2": {
+              "n": 666,
+              "max_letter": "B",
+              "observed_share": 0.232733,
+              "expected_share": 0.2,
+              "delta_pp": 3.273,
+              "chi2": 7.093093,
+              "df": 4,
+              "z": null,
+              "p": null
+            }
+          },
+          "multi_row_families": 440,
+          "family_variant_check_failures": 0
+        }
+      },
+      "failures": [],
+      "construction_failures": [],
+      "position_balance_gate": "report-only（不并入失败即停）",
+      "gate_checks_note": "gate 内的 family 变体/语义组合检查是构造分布自检，不是独立标签判据；research/policy 的 answer_key 构造不变式只进 construction_failures。",
+      "gate": "PASS"
+    },
+    "shortcut": {
+      "splits": {
+        "dev2": {
+          "longest_description": {
+            "accuracy": 0.306,
+            "chance": 0.283683,
+            "delta_pp": 2.232,
+            "family_clustered_se_pp": 2.674,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "agent-benchmarks",
+              "balance_not_updated_after_bank_transfer",
+              "balance_not_updated_after_cheque_or_cash_deposit",
+              "cancel_transfer",
+              "card_delivery_estimate",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "cash_withdrawal_not_recognised",
+              "direct_debit_payment_not_recognised",
+              "extra_charge_on_statement",
+              "interpretability-analysis",
+              "model-architecture",
+              "neutral",
+              "none",
+              "pending_cash_withdrawal",
+              "reasoning-methods",
+              "safety-alignment",
+              "supported_cards_and_currencies",
+              "top_up_by_bank_transfer_charge",
+              "top_up_by_cash_or_cheque",
+              "transfer_fee_charged",
+              "unknown",
+              "verify_source_of_funds",
+              "video-generation",
+              "virtual_card_not_working",
+              "wrong_amount_of_cash_received",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "first_position": {
+            "accuracy": 0.276,
+            "chance": 0.283683,
+            "delta_pp": -0.768,
+            "family_clustered_se_pp": 2.705,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "agent-benchmarks",
+              "agent-skills",
+              "agent-training",
+              "balance_not_updated_after_bank_transfer",
+              "card_linking",
+              "card_not_working",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "card_swallowed",
+              "coding-agents",
+              "compromised_card",
+              "contactless_not_working",
+              "contradicted",
+              "country_support",
+              "data-curation",
+              "default",
+              "diffusion-lms",
+              "document-ocr",
+              "eligible",
+              "entailed",
+              "exchange_charge",
+              "extra_charge_on_statement",
+              "get_disposable_virtual_card",
+              "get_physical_card",
+              "ineligible",
+              "interpretability-analysis",
+              "long-context",
+              "lost_or_stolen_card",
+              "model-architecture",
+              "model-efficiency",
+              "neutral",
+              "no",
+              "none",
+              "order_physical_card",
+              "passcode_forgotten",
+              "pending_card_payment",
+              "pending_top_up",
+              "pending_transfer",
+              "reasoning-methods",
+              "research-automation",
+              "rl-for-reasoning",
+              "robot-policies",
+              "route_1",
+              "route_2",
+              "route_3",
+              "safety-alignment",
+              "search-agents",
+              "top_up_by_cash_or_cheque",
+              "top_up_limits",
+              "top_up_reverted",
+              "transfer_fee_charged",
+              "transfer_not_received_by_recipient",
+              "transfer_timing",
+              "unknown",
+              "verify_source_of_funds",
+              "video-generation",
+              "video-understanding",
+              "virtual_card_not_working",
+              "visa_or_mastercard",
+              "vlm-architectures",
+              "why_verify_identity",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "digit_punctuation_shape": {
+            "accuracy": 0.28,
+            "chance": 0.283683,
+            "delta_pp": -0.368,
+            "family_clustered_se_pp": 2.665,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "agent-benchmarks",
+              "agent-training",
+              "balance_not_updated_after_bank_transfer",
+              "card_linking",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "card_swallowed",
+              "compromised_card",
+              "contactless_not_working",
+              "country_support",
+              "default",
+              "eligible",
+              "exchange_charge",
+              "extra_charge_on_statement",
+              "get_disposable_virtual_card",
+              "get_physical_card",
+              "ineligible",
+              "long-context",
+              "lost_or_stolen_card",
+              "model-efficiency",
+              "neutral",
+              "no",
+              "none",
+              "order_physical_card",
+              "passcode_forgotten",
+              "pending_card_payment",
+              "pending_top_up",
+              "pending_transfer",
+              "reasoning-methods",
+              "reverted_card_payment?",
+              "route_1",
+              "route_2",
+              "route_3",
+              "search-agents",
+              "spatial-3d",
+              "top_up_by_cash_or_cheque",
+              "top_up_limits",
+              "top_up_reverted",
+              "transfer_fee_charged",
+              "transfer_not_received_by_recipient",
+              "transfer_timing",
+              "unknown",
+              "verify_source_of_funds",
+              "virtual_card_not_working",
+              "visa_or_mastercard",
+              "why_verify_identity",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "by_source": {
+            "banking77": {
+              "longest_description": {
+                "accuracy": 0.209302,
+                "chance": 0.181202,
+                "delta_pp": 2.81,
+                "family_clustered_se_pp": 6.004,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "balance_not_updated_after_bank_transfer",
+                  "balance_not_updated_after_cheque_or_cash_deposit",
+                  "cancel_transfer",
+                  "card_delivery_estimate",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "cash_withdrawal_not_recognised",
+                  "direct_debit_payment_not_recognised",
+                  "extra_charge_on_statement",
+                  "none",
+                  "pending_cash_withdrawal",
+                  "supported_cards_and_currencies",
+                  "top_up_by_bank_transfer_charge",
+                  "top_up_by_cash_or_cheque",
+                  "transfer_fee_charged",
+                  "verify_source_of_funds",
+                  "virtual_card_not_working",
+                  "wrong_amount_of_cash_received",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.186047,
+                "chance": 0.181202,
+                "delta_pp": 0.484,
+                "family_clustered_se_pp": 5.98,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "balance_not_updated_after_bank_transfer",
+                  "card_linking",
+                  "card_not_working",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "card_swallowed",
+                  "compromised_card",
+                  "contactless_not_working",
+                  "country_support",
+                  "exchange_charge",
+                  "extra_charge_on_statement",
+                  "get_disposable_virtual_card",
+                  "get_physical_card",
+                  "lost_or_stolen_card",
+                  "none",
+                  "order_physical_card",
+                  "passcode_forgotten",
+                  "pending_card_payment",
+                  "pending_top_up",
+                  "pending_transfer",
+                  "top_up_by_cash_or_cheque",
+                  "top_up_limits",
+                  "top_up_reverted",
+                  "transfer_fee_charged",
+                  "transfer_not_received_by_recipient",
+                  "transfer_timing",
+                  "verify_source_of_funds",
+                  "virtual_card_not_working",
+                  "visa_or_mastercard",
+                  "why_verify_identity",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.162791,
+                "chance": 0.181202,
+                "delta_pp": -1.841,
+                "family_clustered_se_pp": 5.738,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "balance_not_updated_after_bank_transfer",
+                  "card_linking",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "card_swallowed",
+                  "compromised_card",
+                  "contactless_not_working",
+                  "country_support",
+                  "exchange_charge",
+                  "extra_charge_on_statement",
+                  "get_disposable_virtual_card",
+                  "get_physical_card",
+                  "lost_or_stolen_card",
+                  "none",
+                  "order_physical_card",
+                  "passcode_forgotten",
+                  "pending_card_payment",
+                  "pending_top_up",
+                  "pending_transfer",
+                  "reverted_card_payment?",
+                  "top_up_by_cash_or_cheque",
+                  "top_up_limits",
+                  "top_up_reverted",
+                  "transfer_fee_charged",
+                  "transfer_not_received_by_recipient",
+                  "transfer_timing",
+                  "verify_source_of_funds",
+                  "virtual_card_not_working",
+                  "visa_or_mastercard",
+                  "why_verify_identity",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              }
+            },
+            "boolq": {
+              "longest_description": {
+                "accuracy": 0.488889,
+                "chance": 0.5,
+                "delta_pp": -1.111,
+                "family_clustered_se_pp": 7.536,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "yes"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.555556,
+                "chance": 0.5,
+                "delta_pp": 5.556,
+                "family_clustered_se_pp": 7.491,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "no",
+                  "yes"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.555556,
+                "chance": 0.5,
+                "delta_pp": 5.556,
+                "family_clustered_se_pp": 7.491,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "no",
+                  "yes"
+                ],
+                "reject": false
+              }
+            },
+            "mnli": {
+              "longest_description": {
+                "accuracy": 0.324324,
+                "chance": 0.333333,
+                "delta_pp": -0.901,
+                "family_clustered_se_pp": 5.479,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "neutral"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.310811,
+                "chance": 0.333333,
+                "delta_pp": -2.252,
+                "family_clustered_se_pp": 5.417,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "contradicted",
+                  "entailed",
+                  "neutral"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.324324,
+                "chance": 0.333333,
+                "delta_pp": -0.901,
+                "family_clustered_se_pp": 5.479,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "neutral"
+                ],
+                "reject": false
+              }
+            },
+            "policy": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.291667,
+                "chance": 0.333333,
+                "delta_pp": -4.167,
+                "family_clustered_se_pp": 9.835,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.291667,
+                "chance": 0.333333,
+                "delta_pp": -4.167,
+                "family_clustered_se_pp": 9.835,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              }
+            },
+            "policy_v2": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.327586,
+                "chance": 0.333333,
+                "delta_pp": -0.575,
+                "family_clustered_se_pp": 3.255,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              }
+            },
+            "research_taxonomy_v21": {
+              "longest_description": {
+                "accuracy": 0.071429,
+                "chance": 0.072917,
+                "delta_pp": -0.149,
+                "family_clustered_se_pp": 7.143,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "interpretability-analysis",
+                  "model-architecture",
+                  "reasoning-methods",
+                  "safety-alignment",
+                  "video-generation"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.071429,
+                "chance": 0.072917,
+                "delta_pp": -0.149,
+                "family_clustered_se_pp": 3.717,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "agent-skills",
+                  "agent-training",
+                  "coding-agents",
+                  "data-curation",
+                  "diffusion-lms",
+                  "document-ocr",
+                  "interpretability-analysis",
+                  "long-context",
+                  "model-architecture",
+                  "model-efficiency",
+                  "reasoning-methods",
+                  "research-automation",
+                  "rl-for-reasoning",
+                  "robot-policies",
+                  "safety-alignment",
+                  "search-agents",
+                  "video-generation",
+                  "video-understanding",
+                  "vlm-architectures"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.089286,
+                "chance": 0.072917,
+                "delta_pp": 1.637,
+                "family_clustered_se_pp": 3.571,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "agent-training",
+                  "long-context",
+                  "model-efficiency",
+                  "reasoning-methods",
+                  "search-agents",
+                  "spatial-3d"
+                ],
+                "reject": false
+              }
+            },
+            "routing_v2": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.2,
+                "delta_pp": 13.333,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": true
+              },
+              "first_position": {
+                "accuracy": 0.166667,
+                "chance": 0.2,
+                "delta_pp": -3.333,
+                "family_clustered_se_pp": 3.026,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "default",
+                  "route_1",
+                  "route_2",
+                  "route_3",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.166667,
+                "chance": 0.2,
+                "delta_pp": -3.333,
+                "family_clustered_se_pp": 3.026,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "default",
+                  "route_1",
+                  "route_2",
+                  "route_3",
+                  "unknown"
+                ],
+                "reject": false
+              }
+            }
+          }
+        },
+        "calibration2": {
+          "longest_description": {
+            "accuracy": 0.3,
+            "chance": 0.281894,
+            "delta_pp": 1.811,
+            "family_clustered_se_pp": 1.506,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "Refund_not_showing_up",
+              "agent-benchmarks",
+              "agent-training",
+              "balance_not_updated_after_bank_transfer",
+              "balance_not_updated_after_cheque_or_cash_deposit",
+              "card_about_to_expire",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "cash_withdrawal_not_recognised",
+              "declined_card_payment",
+              "direct_debit_payment_not_recognised",
+              "disposable_card_limits",
+              "extra_charge_on_statement",
+              "get_disposable_virtual_card",
+              "interpretability-analysis",
+              "long-context",
+              "model-architecture",
+              "neutral",
+              "none",
+              "reasoning-methods",
+              "reverted_card_payment?",
+              "safety-alignment",
+              "supported_cards_and_currencies",
+              "top_up_by_bank_transfer_charge",
+              "top_up_by_cash_or_cheque",
+              "top_up_reverted",
+              "transfer_not_received_by_recipient",
+              "unable_to_verify_identity",
+              "unknown",
+              "virtual_card_not_working",
+              "vlm-architectures",
+              "wrong_amount_of_cash_received",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "first_position": {
+            "accuracy": 0.306667,
+            "chance": 0.281894,
+            "delta_pp": 2.477,
+            "family_clustered_se_pp": 1.61,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "Refund_not_showing_up",
+              "activate_my_card",
+              "agent-benchmarks",
+              "agent-skills",
+              "agent-training",
+              "apple_pay_or_google_pay",
+              "atm_support",
+              "audio-speech",
+              "automatic_top_up",
+              "balance_not_updated_after_bank_transfer",
+              "balance_not_updated_after_cheque_or_cash_deposit",
+              "beneficiary_not_allowed",
+              "card_about_to_expire",
+              "card_arrival",
+              "card_linking",
+              "card_not_working",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "card_swallowed",
+              "cash_withdrawal_charge",
+              "cash_withdrawal_not_recognised",
+              "coding-agents",
+              "contactless_not_working",
+              "contradicted",
+              "country_support",
+              "data-curation",
+              "declined_card_payment",
+              "declined_cash_withdrawal",
+              "declined_transfer",
+              "default",
+              "diffusion-lms",
+              "direct_debit_payment_not_recognised",
+              "document-ocr",
+              "edit_personal_details",
+              "eligible",
+              "entailed",
+              "exchange_charge",
+              "exchange_rate",
+              "exchange_via_app",
+              "failed_transfer",
+              "fiat_currency_support",
+              "get_disposable_virtual_card",
+              "get_physical_card",
+              "getting_spare_card",
+              "getting_virtual_card",
+              "image-generation",
+              "ineligible",
+              "interpretability-analysis",
+              "long-context",
+              "lost_or_stolen_card",
+              "model-architecture",
+              "model-efficiency",
+              "neutral",
+              "no",
+              "none",
+              "order_physical_card",
+              "pending_card_payment",
+              "pending_cash_withdrawal",
+              "pending_top_up",
+              "pending_transfer",
+              "reasoning-methods",
+              "request_refund",
+              "research-automation",
+              "reverted_card_payment?",
+              "rl-for-reasoning",
+              "robot-policies",
+              "route_1",
+              "route_2",
+              "route_3",
+              "safety-alignment",
+              "science-medicine",
+              "search-agents",
+              "spatial-3d",
+              "supported_cards_and_currencies",
+              "top_up_by_bank_transfer_charge",
+              "top_up_by_card_charge",
+              "top_up_by_cash_or_cheque",
+              "top_up_failed",
+              "top_up_limits",
+              "top_up_reverted",
+              "topping_up_by_card",
+              "transaction_charged_twice",
+              "transfer_fee_charged",
+              "transfer_not_received_by_recipient",
+              "transfer_timing",
+              "unable_to_verify_identity",
+              "unknown",
+              "verify_my_identity",
+              "verify_source_of_funds",
+              "video-generation",
+              "video-understanding",
+              "virtual_card_not_working",
+              "visa_or_mastercard",
+              "vlm-architectures",
+              "why_verify_identity",
+              "wrong_amount_of_cash_received",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "digit_punctuation_shape": {
+            "accuracy": 0.287333,
+            "chance": 0.281894,
+            "delta_pp": 0.544,
+            "family_clustered_se_pp": 1.576,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "Refund_not_showing_up",
+              "activate_my_card",
+              "agent-benchmarks",
+              "agent-training",
+              "atm_support",
+              "automatic_top_up",
+              "balance_not_updated_after_bank_transfer",
+              "balance_not_updated_after_cheque_or_cash_deposit",
+              "beneficiary_not_allowed",
+              "card_about_to_expire",
+              "card_arrival",
+              "card_linking",
+              "card_not_working",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "card_swallowed",
+              "cash_withdrawal_charge",
+              "cash_withdrawal_not_recognised",
+              "contactless_not_working",
+              "declined_card_payment",
+              "declined_cash_withdrawal",
+              "declined_transfer",
+              "default",
+              "direct_debit_payment_not_recognised",
+              "edit_personal_details",
+              "eligible",
+              "exchange_charge",
+              "exchange_rate",
+              "failed_transfer",
+              "fiat_currency_support",
+              "get_disposable_virtual_card",
+              "get_physical_card",
+              "getting_spare_card",
+              "getting_virtual_card",
+              "ineligible",
+              "long-context",
+              "lost_or_stolen_card",
+              "model-efficiency",
+              "neutral",
+              "no",
+              "none",
+              "order_physical_card",
+              "pending_card_payment",
+              "pending_cash_withdrawal",
+              "pending_top_up",
+              "pending_transfer",
+              "reasoning-methods",
+              "request_refund",
+              "reverted_card_payment?",
+              "route_1",
+              "route_2",
+              "route_3",
+              "search-agents",
+              "spatial-3d",
+              "supported_cards_and_currencies",
+              "top_up_by_bank_transfer_charge",
+              "top_up_by_card_charge",
+              "top_up_by_cash_or_cheque",
+              "top_up_failed",
+              "top_up_limits",
+              "top_up_reverted",
+              "topping_up_by_card",
+              "transaction_charged_twice",
+              "transfer_fee_charged",
+              "transfer_not_received_by_recipient",
+              "transfer_timing",
+              "unable_to_verify_identity",
+              "unknown",
+              "verify_my_identity",
+              "verify_source_of_funds",
+              "virtual_card_not_working",
+              "visa_or_mastercard",
+              "why_verify_identity",
+              "wrong_amount_of_cash_received",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "by_source": {
+            "banking77": {
+              "longest_description": {
+                "accuracy": 0.122137,
+                "chance": 0.180344,
+                "delta_pp": -5.821,
+                "family_clustered_se_pp": 2.887,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "Refund_not_showing_up",
+                  "balance_not_updated_after_bank_transfer",
+                  "balance_not_updated_after_cheque_or_cash_deposit",
+                  "card_about_to_expire",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "cash_withdrawal_not_recognised",
+                  "declined_card_payment",
+                  "direct_debit_payment_not_recognised",
+                  "disposable_card_limits",
+                  "extra_charge_on_statement",
+                  "get_disposable_virtual_card",
+                  "none",
+                  "reverted_card_payment?",
+                  "supported_cards_and_currencies",
+                  "top_up_by_bank_transfer_charge",
+                  "top_up_by_cash_or_cheque",
+                  "top_up_reverted",
+                  "transfer_not_received_by_recipient",
+                  "unable_to_verify_identity",
+                  "virtual_card_not_working",
+                  "wrong_amount_of_cash_received",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.21374,
+                "chance": 0.180344,
+                "delta_pp": 3.34,
+                "family_clustered_se_pp": 3.587,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "Refund_not_showing_up",
+                  "activate_my_card",
+                  "apple_pay_or_google_pay",
+                  "atm_support",
+                  "automatic_top_up",
+                  "balance_not_updated_after_bank_transfer",
+                  "balance_not_updated_after_cheque_or_cash_deposit",
+                  "beneficiary_not_allowed",
+                  "card_about_to_expire",
+                  "card_arrival",
+                  "card_linking",
+                  "card_not_working",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "card_swallowed",
+                  "cash_withdrawal_charge",
+                  "cash_withdrawal_not_recognised",
+                  "contactless_not_working",
+                  "country_support",
+                  "declined_card_payment",
+                  "declined_cash_withdrawal",
+                  "declined_transfer",
+                  "direct_debit_payment_not_recognised",
+                  "edit_personal_details",
+                  "exchange_charge",
+                  "exchange_rate",
+                  "exchange_via_app",
+                  "failed_transfer",
+                  "fiat_currency_support",
+                  "get_disposable_virtual_card",
+                  "get_physical_card",
+                  "getting_spare_card",
+                  "getting_virtual_card",
+                  "lost_or_stolen_card",
+                  "none",
+                  "order_physical_card",
+                  "pending_card_payment",
+                  "pending_cash_withdrawal",
+                  "pending_top_up",
+                  "pending_transfer",
+                  "request_refund",
+                  "reverted_card_payment?",
+                  "supported_cards_and_currencies",
+                  "top_up_by_bank_transfer_charge",
+                  "top_up_by_card_charge",
+                  "top_up_by_cash_or_cheque",
+                  "top_up_failed",
+                  "top_up_limits",
+                  "top_up_reverted",
+                  "topping_up_by_card",
+                  "transaction_charged_twice",
+                  "transfer_fee_charged",
+                  "transfer_not_received_by_recipient",
+                  "transfer_timing",
+                  "unable_to_verify_identity",
+                  "verify_my_identity",
+                  "verify_source_of_funds",
+                  "virtual_card_not_working",
+                  "visa_or_mastercard",
+                  "why_verify_identity",
+                  "wrong_amount_of_cash_received",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.21374,
+                "chance": 0.180344,
+                "delta_pp": 3.34,
+                "family_clustered_se_pp": 3.587,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "Refund_not_showing_up",
+                  "activate_my_card",
+                  "atm_support",
+                  "automatic_top_up",
+                  "balance_not_updated_after_bank_transfer",
+                  "balance_not_updated_after_cheque_or_cash_deposit",
+                  "beneficiary_not_allowed",
+                  "card_about_to_expire",
+                  "card_arrival",
+                  "card_linking",
+                  "card_not_working",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "card_swallowed",
+                  "cash_withdrawal_charge",
+                  "cash_withdrawal_not_recognised",
+                  "contactless_not_working",
+                  "declined_card_payment",
+                  "declined_cash_withdrawal",
+                  "declined_transfer",
+                  "direct_debit_payment_not_recognised",
+                  "edit_personal_details",
+                  "exchange_charge",
+                  "exchange_rate",
+                  "failed_transfer",
+                  "fiat_currency_support",
+                  "get_disposable_virtual_card",
+                  "get_physical_card",
+                  "getting_spare_card",
+                  "getting_virtual_card",
+                  "lost_or_stolen_card",
+                  "none",
+                  "order_physical_card",
+                  "pending_card_payment",
+                  "pending_cash_withdrawal",
+                  "pending_top_up",
+                  "pending_transfer",
+                  "request_refund",
+                  "reverted_card_payment?",
+                  "supported_cards_and_currencies",
+                  "top_up_by_bank_transfer_charge",
+                  "top_up_by_card_charge",
+                  "top_up_by_cash_or_cheque",
+                  "top_up_failed",
+                  "top_up_limits",
+                  "top_up_reverted",
+                  "topping_up_by_card",
+                  "transaction_charged_twice",
+                  "transfer_fee_charged",
+                  "transfer_not_received_by_recipient",
+                  "transfer_timing",
+                  "unable_to_verify_identity",
+                  "verify_my_identity",
+                  "verify_source_of_funds",
+                  "virtual_card_not_working",
+                  "visa_or_mastercard",
+                  "why_verify_identity",
+                  "wrong_amount_of_cash_received",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              }
+            },
+            "boolq": {
+              "longest_description": {
+                "accuracy": 0.503817,
+                "chance": 0.5,
+                "delta_pp": 0.382,
+                "family_clustered_se_pp": 4.385,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "yes"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.549618,
+                "chance": 0.5,
+                "delta_pp": 4.962,
+                "family_clustered_se_pp": 4.364,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "no",
+                  "yes"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.549618,
+                "chance": 0.5,
+                "delta_pp": 4.962,
+                "family_clustered_se_pp": 4.364,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "no",
+                  "yes"
+                ],
+                "reject": false
+              }
+            },
+            "mnli": {
+              "longest_description": {
+                "accuracy": 0.330275,
+                "chance": 0.333333,
+                "delta_pp": -0.306,
+                "family_clustered_se_pp": 3.193,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "neutral"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.362385,
+                "chance": 0.333333,
+                "delta_pp": 2.905,
+                "family_clustered_se_pp": 3.263,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "contradicted",
+                  "entailed",
+                  "neutral"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.330275,
+                "chance": 0.333333,
+                "delta_pp": -0.306,
+                "family_clustered_se_pp": 3.193,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "neutral"
+                ],
+                "reject": false
+              }
+            },
+            "policy": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.30303,
+                "chance": 0.333333,
+                "delta_pp": -3.03,
+                "family_clustered_se_pp": 5.331,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.30303,
+                "chance": 0.333333,
+                "delta_pp": -3.03,
+                "family_clustered_se_pp": 5.331,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              }
+            },
+            "policy_v2": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.367816,
+                "chance": 0.333333,
+                "delta_pp": 3.448,
+                "family_clustered_se_pp": 1.949,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              }
+            },
+            "research_taxonomy_v21": {
+              "longest_description": {
+                "accuracy": 0.071429,
+                "chance": 0.072917,
+                "delta_pp": -0.149,
+                "family_clustered_se_pp": 3.404,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "agent-training",
+                  "interpretability-analysis",
+                  "long-context",
+                  "model-architecture",
+                  "reasoning-methods",
+                  "safety-alignment",
+                  "vlm-architectures"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.083333,
+                "chance": 0.072917,
+                "delta_pp": 1.042,
+                "family_clustered_se_pp": 2.171,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "agent-skills",
+                  "agent-training",
+                  "audio-speech",
+                  "coding-agents",
+                  "data-curation",
+                  "diffusion-lms",
+                  "document-ocr",
+                  "image-generation",
+                  "interpretability-analysis",
+                  "long-context",
+                  "model-architecture",
+                  "model-efficiency",
+                  "reasoning-methods",
+                  "research-automation",
+                  "rl-for-reasoning",
+                  "robot-policies",
+                  "safety-alignment",
+                  "science-medicine",
+                  "search-agents",
+                  "spatial-3d",
+                  "video-generation",
+                  "video-understanding",
+                  "vlm-architectures"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.059524,
+                "chance": 0.072917,
+                "delta_pp": -1.339,
+                "family_clustered_se_pp": 2.811,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "agent-training",
+                  "long-context",
+                  "model-efficiency",
+                  "reasoning-methods",
+                  "search-agents",
+                  "spatial-3d"
+                ],
+                "reject": false
+              }
+            },
+            "routing_v2": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.2,
+                "delta_pp": 13.333,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": true
+              },
+              "first_position": {
+                "accuracy": 0.208333,
+                "chance": 0.2,
+                "delta_pp": 0.833,
+                "family_clustered_se_pp": 2.77,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "default",
+                  "route_1",
+                  "route_2",
+                  "route_3",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.208333,
+                "chance": 0.2,
+                "delta_pp": 0.833,
+                "family_clustered_se_pp": 2.77,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "default",
+                  "route_1",
+                  "route_2",
+                  "route_3",
+                  "unknown"
+                ],
+                "reject": false
+              }
+            }
+          }
+        },
+        "test2": {
+          "longest_description": {
+            "accuracy": 0.310789,
+            "chance": 0.282498,
+            "delta_pp": 2.829,
+            "family_clustered_se_pp": 0.984,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "activate_my_card",
+              "agent-benchmarks",
+              "apple_pay_or_google_pay",
+              "balance_not_updated_after_bank_transfer",
+              "balance_not_updated_after_cheque_or_cash_deposit",
+              "beneficiary_not_allowed",
+              "card_about_to_expire",
+              "card_delivery_estimate",
+              "card_not_working",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "cash_withdrawal_not_recognised",
+              "contactless_not_working",
+              "declined_card_payment",
+              "declined_cash_withdrawal",
+              "direct_debit_payment_not_recognised",
+              "disposable_card_limits",
+              "exchange_via_app",
+              "extra_charge_on_statement",
+              "fiat_currency_support",
+              "get_disposable_virtual_card",
+              "getting_virtual_card",
+              "interpretability-analysis",
+              "long-context",
+              "lost_or_stolen_card",
+              "lost_or_stolen_phone",
+              "model-architecture",
+              "neutral",
+              "none",
+              "pending_card_payment",
+              "reasoning-methods",
+              "reverted_card_payment?",
+              "safety-alignment",
+              "science-medicine",
+              "supported_cards_and_currencies",
+              "top_up_by_bank_transfer_charge",
+              "top_up_by_card_charge",
+              "top_up_by_cash_or_cheque",
+              "topping_up_by_card",
+              "transaction_charged_twice",
+              "transfer_into_account",
+              "transfer_not_received_by_recipient",
+              "unable_to_verify_identity",
+              "unknown",
+              "verify_source_of_funds",
+              "video-generation",
+              "virtual_card_not_working",
+              "vlm-architectures",
+              "wrong_amount_of_cash_received",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "first_position": {
+            "accuracy": 0.281316,
+            "chance": 0.282498,
+            "delta_pp": -0.118,
+            "family_clustered_se_pp": 0.976,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "Refund_not_showing_up",
+              "activate_my_card",
+              "age_limit",
+              "agent-benchmarks",
+              "agent-skills",
+              "agent-training",
+              "apple_pay_or_google_pay",
+              "atm_support",
+              "audio-speech",
+              "automatic_top_up",
+              "balance_not_updated_after_bank_transfer",
+              "balance_not_updated_after_cheque_or_cash_deposit",
+              "cancel_transfer",
+              "card_about_to_expire",
+              "card_acceptance",
+              "card_arrival",
+              "card_delivery_estimate",
+              "card_linking",
+              "card_not_working",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "card_swallowed",
+              "cash_withdrawal_charge",
+              "cash_withdrawal_not_recognised",
+              "change_pin",
+              "coding-agents",
+              "compromised_card",
+              "contactless_not_working",
+              "contradicted",
+              "country_support",
+              "data-curation",
+              "declined_card_payment",
+              "declined_cash_withdrawal",
+              "declined_transfer",
+              "default",
+              "diffusion-lms",
+              "direct_debit_payment_not_recognised",
+              "disposable_card_limits",
+              "document-ocr",
+              "edit_personal_details",
+              "eligible",
+              "entailed",
+              "exchange_charge",
+              "exchange_rate",
+              "extra_charge_on_statement",
+              "failed_transfer",
+              "fiat_currency_support",
+              "get_disposable_virtual_card",
+              "get_physical_card",
+              "getting_spare_card",
+              "getting_virtual_card",
+              "image-generation",
+              "ineligible",
+              "interpretability-analysis",
+              "long-context",
+              "lost_or_stolen_card",
+              "lost_or_stolen_phone",
+              "model-architecture",
+              "model-efficiency",
+              "neutral",
+              "no",
+              "none",
+              "order_physical_card",
+              "passcode_forgotten",
+              "pending_card_payment",
+              "pending_cash_withdrawal",
+              "pending_top_up",
+              "pending_transfer",
+              "pin_blocked",
+              "reasoning-methods",
+              "receiving_money",
+              "request_refund",
+              "research-automation",
+              "reverted_card_payment?",
+              "rl-for-reasoning",
+              "robot-policies",
+              "route_1",
+              "route_2",
+              "route_3",
+              "safety-alignment",
+              "science-medicine",
+              "search-agents",
+              "spatial-3d",
+              "terminate_account",
+              "top_up_by_bank_transfer_charge",
+              "top_up_by_card_charge",
+              "top_up_by_cash_or_cheque",
+              "top_up_failed",
+              "top_up_limits",
+              "top_up_reverted",
+              "topping_up_by_card",
+              "transaction_charged_twice",
+              "transfer_fee_charged",
+              "transfer_into_account",
+              "transfer_not_received_by_recipient",
+              "transfer_timing",
+              "unable_to_verify_identity",
+              "unknown",
+              "verify_my_identity",
+              "verify_source_of_funds",
+              "verify_top_up",
+              "video-generation",
+              "video-understanding",
+              "virtual_card_not_working",
+              "visa_or_mastercard",
+              "vlm-architectures",
+              "why_verify_identity",
+              "wrong_amount_of_cash_received",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "digit_punctuation_shape": {
+            "accuracy": 0.283947,
+            "chance": 0.282498,
+            "delta_pp": 0.145,
+            "family_clustered_se_pp": 0.972,
+            "constant_class_prior": false,
+            "predicted_keys": [
+              "Refund_not_showing_up",
+              "activate_my_card",
+              "age_limit",
+              "agent-benchmarks",
+              "agent-training",
+              "apple_pay_or_google_pay",
+              "atm_support",
+              "automatic_top_up",
+              "balance_not_updated_after_bank_transfer",
+              "balance_not_updated_after_cheque_or_cash_deposit",
+              "cancel_transfer",
+              "card_about_to_expire",
+              "card_acceptance",
+              "card_arrival",
+              "card_delivery_estimate",
+              "card_linking",
+              "card_not_working",
+              "card_payment_fee_charged",
+              "card_payment_not_recognised",
+              "card_payment_wrong_exchange_rate",
+              "card_swallowed",
+              "cash_withdrawal_charge",
+              "cash_withdrawal_not_recognised",
+              "change_pin",
+              "coding-agents",
+              "compromised_card",
+              "contactless_not_working",
+              "country_support",
+              "declined_card_payment",
+              "declined_cash_withdrawal",
+              "declined_transfer",
+              "default",
+              "direct_debit_payment_not_recognised",
+              "disposable_card_limits",
+              "document-ocr",
+              "edit_personal_details",
+              "eligible",
+              "exchange_charge",
+              "exchange_rate",
+              "extra_charge_on_statement",
+              "failed_transfer",
+              "fiat_currency_support",
+              "get_disposable_virtual_card",
+              "get_physical_card",
+              "getting_spare_card",
+              "getting_virtual_card",
+              "image-generation",
+              "ineligible",
+              "long-context",
+              "lost_or_stolen_card",
+              "lost_or_stolen_phone",
+              "model-efficiency",
+              "neutral",
+              "no",
+              "none",
+              "order_physical_card",
+              "passcode_forgotten",
+              "pending_card_payment",
+              "pending_cash_withdrawal",
+              "pending_top_up",
+              "pending_transfer",
+              "pin_blocked",
+              "reasoning-methods",
+              "receiving_money",
+              "request_refund",
+              "reverted_card_payment?",
+              "route_1",
+              "route_2",
+              "route_3",
+              "safety-alignment",
+              "search-agents",
+              "spatial-3d",
+              "terminate_account",
+              "top_up_by_bank_transfer_charge",
+              "top_up_by_card_charge",
+              "top_up_by_cash_or_cheque",
+              "top_up_failed",
+              "top_up_limits",
+              "top_up_reverted",
+              "topping_up_by_card",
+              "transaction_charged_twice",
+              "transfer_fee_charged",
+              "transfer_into_account",
+              "transfer_not_received_by_recipient",
+              "transfer_timing",
+              "unable_to_verify_identity",
+              "unknown",
+              "verify_my_identity",
+              "verify_source_of_funds",
+              "verify_top_up",
+              "virtual_card_not_working",
+              "visa_or_mastercard",
+              "why_verify_identity",
+              "wrong_amount_of_cash_received",
+              "wrong_exchange_rate_for_cash_withdrawal",
+              "yes"
+            ],
+            "reject": false
+          },
+          "by_source": {
+            "banking77": {
+              "longest_description": {
+                "accuracy": 0.219219,
+                "chance": 0.18531,
+                "delta_pp": 3.391,
+                "family_clustered_se_pp": 2.263,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "activate_my_card",
+                  "apple_pay_or_google_pay",
+                  "balance_not_updated_after_bank_transfer",
+                  "balance_not_updated_after_cheque_or_cash_deposit",
+                  "beneficiary_not_allowed",
+                  "card_about_to_expire",
+                  "card_delivery_estimate",
+                  "card_not_working",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "cash_withdrawal_not_recognised",
+                  "contactless_not_working",
+                  "declined_card_payment",
+                  "declined_cash_withdrawal",
+                  "direct_debit_payment_not_recognised",
+                  "disposable_card_limits",
+                  "exchange_via_app",
+                  "extra_charge_on_statement",
+                  "fiat_currency_support",
+                  "get_disposable_virtual_card",
+                  "getting_virtual_card",
+                  "lost_or_stolen_card",
+                  "lost_or_stolen_phone",
+                  "none",
+                  "pending_card_payment",
+                  "reverted_card_payment?",
+                  "supported_cards_and_currencies",
+                  "top_up_by_bank_transfer_charge",
+                  "top_up_by_card_charge",
+                  "top_up_by_cash_or_cheque",
+                  "topping_up_by_card",
+                  "transaction_charged_twice",
+                  "transfer_into_account",
+                  "transfer_not_received_by_recipient",
+                  "unable_to_verify_identity",
+                  "verify_source_of_funds",
+                  "virtual_card_not_working",
+                  "wrong_amount_of_cash_received",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.171171,
+                "chance": 0.18531,
+                "delta_pp": -1.414,
+                "family_clustered_se_pp": 2.048,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "Refund_not_showing_up",
+                  "activate_my_card",
+                  "age_limit",
+                  "apple_pay_or_google_pay",
+                  "atm_support",
+                  "automatic_top_up",
+                  "balance_not_updated_after_bank_transfer",
+                  "balance_not_updated_after_cheque_or_cash_deposit",
+                  "cancel_transfer",
+                  "card_about_to_expire",
+                  "card_acceptance",
+                  "card_arrival",
+                  "card_delivery_estimate",
+                  "card_linking",
+                  "card_not_working",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "card_swallowed",
+                  "cash_withdrawal_charge",
+                  "cash_withdrawal_not_recognised",
+                  "change_pin",
+                  "compromised_card",
+                  "contactless_not_working",
+                  "country_support",
+                  "declined_card_payment",
+                  "declined_cash_withdrawal",
+                  "declined_transfer",
+                  "direct_debit_payment_not_recognised",
+                  "disposable_card_limits",
+                  "edit_personal_details",
+                  "exchange_charge",
+                  "exchange_rate",
+                  "extra_charge_on_statement",
+                  "failed_transfer",
+                  "fiat_currency_support",
+                  "get_disposable_virtual_card",
+                  "get_physical_card",
+                  "getting_spare_card",
+                  "getting_virtual_card",
+                  "lost_or_stolen_card",
+                  "lost_or_stolen_phone",
+                  "none",
+                  "order_physical_card",
+                  "passcode_forgotten",
+                  "pending_card_payment",
+                  "pending_cash_withdrawal",
+                  "pending_top_up",
+                  "pending_transfer",
+                  "pin_blocked",
+                  "receiving_money",
+                  "request_refund",
+                  "reverted_card_payment?",
+                  "terminate_account",
+                  "top_up_by_bank_transfer_charge",
+                  "top_up_by_card_charge",
+                  "top_up_by_cash_or_cheque",
+                  "top_up_failed",
+                  "top_up_limits",
+                  "top_up_reverted",
+                  "topping_up_by_card",
+                  "transaction_charged_twice",
+                  "transfer_fee_charged",
+                  "transfer_into_account",
+                  "transfer_not_received_by_recipient",
+                  "transfer_timing",
+                  "unable_to_verify_identity",
+                  "verify_my_identity",
+                  "verify_source_of_funds",
+                  "verify_top_up",
+                  "virtual_card_not_working",
+                  "visa_or_mastercard",
+                  "why_verify_identity",
+                  "wrong_amount_of_cash_received",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.171171,
+                "chance": 0.18531,
+                "delta_pp": -1.414,
+                "family_clustered_se_pp": 2.048,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "Refund_not_showing_up",
+                  "activate_my_card",
+                  "age_limit",
+                  "apple_pay_or_google_pay",
+                  "atm_support",
+                  "automatic_top_up",
+                  "balance_not_updated_after_bank_transfer",
+                  "balance_not_updated_after_cheque_or_cash_deposit",
+                  "cancel_transfer",
+                  "card_about_to_expire",
+                  "card_acceptance",
+                  "card_arrival",
+                  "card_delivery_estimate",
+                  "card_linking",
+                  "card_not_working",
+                  "card_payment_fee_charged",
+                  "card_payment_not_recognised",
+                  "card_payment_wrong_exchange_rate",
+                  "card_swallowed",
+                  "cash_withdrawal_charge",
+                  "cash_withdrawal_not_recognised",
+                  "change_pin",
+                  "compromised_card",
+                  "contactless_not_working",
+                  "country_support",
+                  "declined_card_payment",
+                  "declined_cash_withdrawal",
+                  "declined_transfer",
+                  "direct_debit_payment_not_recognised",
+                  "disposable_card_limits",
+                  "edit_personal_details",
+                  "exchange_charge",
+                  "exchange_rate",
+                  "extra_charge_on_statement",
+                  "failed_transfer",
+                  "fiat_currency_support",
+                  "get_disposable_virtual_card",
+                  "get_physical_card",
+                  "getting_spare_card",
+                  "getting_virtual_card",
+                  "lost_or_stolen_card",
+                  "lost_or_stolen_phone",
+                  "none",
+                  "order_physical_card",
+                  "passcode_forgotten",
+                  "pending_card_payment",
+                  "pending_cash_withdrawal",
+                  "pending_top_up",
+                  "pending_transfer",
+                  "pin_blocked",
+                  "receiving_money",
+                  "request_refund",
+                  "reverted_card_payment?",
+                  "terminate_account",
+                  "top_up_by_bank_transfer_charge",
+                  "top_up_by_card_charge",
+                  "top_up_by_cash_or_cheque",
+                  "top_up_failed",
+                  "top_up_limits",
+                  "top_up_reverted",
+                  "topping_up_by_card",
+                  "transaction_charged_twice",
+                  "transfer_fee_charged",
+                  "transfer_into_account",
+                  "transfer_not_received_by_recipient",
+                  "transfer_timing",
+                  "unable_to_verify_identity",
+                  "verify_my_identity",
+                  "verify_source_of_funds",
+                  "verify_top_up",
+                  "virtual_card_not_working",
+                  "visa_or_mastercard",
+                  "why_verify_identity",
+                  "wrong_amount_of_cash_received",
+                  "wrong_exchange_rate_for_cash_withdrawal"
+                ],
+                "reject": false
+              }
+            },
+            "boolq": {
+              "longest_description": {
+                "accuracy": 0.5,
+                "chance": 0.5,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 2.748,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "yes"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.572289,
+                "chance": 0.5,
+                "delta_pp": 7.229,
+                "family_clustered_se_pp": 2.719,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "no",
+                  "yes"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.572289,
+                "chance": 0.5,
+                "delta_pp": 7.229,
+                "family_clustered_se_pp": 2.719,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "no",
+                  "yes"
+                ],
+                "reject": false
+              }
+            },
+            "mnli": {
+              "longest_description": {
+                "accuracy": 0.333935,
+                "chance": 0.333333,
+                "delta_pp": 0.06,
+                "family_clustered_se_pp": 2.006,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "neutral"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.303249,
+                "chance": 0.333333,
+                "delta_pp": -3.008,
+                "family_clustered_se_pp": 1.955,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "contradicted",
+                  "entailed",
+                  "neutral"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.333935,
+                "chance": 0.333333,
+                "delta_pp": 0.06,
+                "family_clustered_se_pp": 2.006,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "neutral"
+                ],
+                "reject": false
+              }
+            },
+            "policy": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.357576,
+                "chance": 0.333333,
+                "delta_pp": 2.424,
+                "family_clustered_se_pp": 3.756,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.357576,
+                "chance": 0.333333,
+                "delta_pp": 2.424,
+                "family_clustered_se_pp": 3.756,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              }
+            },
+            "policy_v2": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.335596,
+                "chance": 0.333333,
+                "delta_pp": 0.226,
+                "family_clustered_se_pp": 1.28,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.333333,
+                "chance": 0.333333,
+                "delta_pp": 0.0,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": false
+              }
+            },
+            "research_taxonomy_v21": {
+              "longest_description": {
+                "accuracy": 0.089623,
+                "chance": 0.072917,
+                "delta_pp": 1.671,
+                "family_clustered_se_pp": 2.218,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "interpretability-analysis",
+                  "long-context",
+                  "model-architecture",
+                  "reasoning-methods",
+                  "safety-alignment",
+                  "science-medicine",
+                  "video-generation",
+                  "vlm-architectures"
+                ],
+                "reject": false
+              },
+              "first_position": {
+                "accuracy": 0.084906,
+                "chance": 0.072917,
+                "delta_pp": 1.199,
+                "family_clustered_se_pp": 1.25,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "agent-skills",
+                  "agent-training",
+                  "audio-speech",
+                  "coding-agents",
+                  "data-curation",
+                  "diffusion-lms",
+                  "document-ocr",
+                  "image-generation",
+                  "interpretability-analysis",
+                  "long-context",
+                  "model-architecture",
+                  "model-efficiency",
+                  "reasoning-methods",
+                  "research-automation",
+                  "rl-for-reasoning",
+                  "robot-policies",
+                  "safety-alignment",
+                  "science-medicine",
+                  "search-agents",
+                  "spatial-3d",
+                  "video-generation",
+                  "video-understanding",
+                  "vlm-architectures"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.075472,
+                "chance": 0.072917,
+                "delta_pp": 0.256,
+                "family_clustered_se_pp": 1.695,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "agent-benchmarks",
+                  "agent-training",
+                  "coding-agents",
+                  "document-ocr",
+                  "image-generation",
+                  "long-context",
+                  "model-efficiency",
+                  "reasoning-methods",
+                  "safety-alignment",
+                  "search-agents",
+                  "spatial-3d"
+                ],
+                "reject": false
+              }
+            },
+            "routing_v2": {
+              "longest_description": {
+                "accuracy": 0.333333,
+                "chance": 0.2,
+                "delta_pp": 13.333,
+                "family_clustered_se_pp": 0.0,
+                "constant_class_prior": true,
+                "predicted_keys": [
+                  "unknown"
+                ],
+                "reject": true
+              },
+              "first_position": {
+                "accuracy": 0.171171,
+                "chance": 0.2,
+                "delta_pp": -2.883,
+                "family_clustered_se_pp": 1.357,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "default",
+                  "route_1",
+                  "route_2",
+                  "route_3",
+                  "unknown"
+                ],
+                "reject": false
+              },
+              "digit_punctuation_shape": {
+                "accuracy": 0.171171,
+                "chance": 0.2,
+                "delta_pp": -2.883,
+                "family_clustered_se_pp": 1.357,
+                "constant_class_prior": false,
+                "predicted_keys": [
+                  "default",
+                  "route_1",
+                  "route_2",
+                  "route_3",
+                  "unknown"
+                ],
+                "reject": false
+              }
+            }
+          }
+        }
+      },
+      "triggered": [],
+      "gate_note": "gate 用聚合值；by_source 只报告，banking77 的选项描述由金标派生",
+      "gate": "PASS"
+    },
+    "template": {
+      "synthetic_rows": 3939,
+      "legacy_whitelist_hit_rate": 1.0,
+      "legacy_whitelist_note": "恒真（生成器词汇必现），仅 sanity check；不进门。",
+      "scaffold_markers": [
+        "{main}",
+        "{method}",
+        "{outcome}",
+        "{other}",
+        "TODO",
+        "Generate ",
+        "<|"
+      ],
+      "scaffold_hit_count": 0,
+      "scaffold_failures": [],
+      "construction_failures": [],
+      "research_label_note": "research 金标为构造标签，无独立预言机；验证覆盖模板 round-trip 与 option 映射；构造不变式恒真，只作生成器自检。",
+      "policy_label_note": "policy 金标由 policy_label(tree, atom_facts) 构造；重算与 answer_key 同源，恒真；只作构造自检，不作为独立标签判据。",
+      "gate_checks_note": "gate 内保留的 family 变体/语义组合检查是构造分布自检（可捕获生成器回归/损坏），不是独立标签预言机；独立标签判据仅 policy_v2/routing 的上游 bitset oracle 与公开源 gold。",
+      "structural_failures": [],
+      "structural_failure_count": 0,
+      "validate_partitions": {
+        "records": 5800,
+        "groups": 2533,
+        "cross_split_group_overlap": 0,
+        "cross_split_normalized_state_overlap": 0,
+        "cross_split_exact_prompt_overlap": 0
+      },
+      "gate": "PASS"
+    },
+    "coverage": {
+      "min_families_per_cell": {
+        "dev2": 5,
+        "calibration2": 15,
+        "test2": 40
+      },
+      "failures": [],
+      "gate": "PASS"
+    },
+    "gate": "PASS"
+  },
+  "disclosures": [
+    "公开源预训练接触：新终评约 32% 来自真实公开语料（mnli/boolq/banking77），无法排除已被底座预训练接触；合成源约 68% 不受此限。",
+    "模板/词表/规则与历史同源：合成源沿用同一批生成器。",
+    "research_taxonomy_v21 的三切分均由上游 TEST_TEMPLATES 生成（split 名称非 train/dev）；模板集合相同，实例与 family 不同；实际模板集已写入 provenance.template_set。provenance.template_split 沿用上游字段记录 split 名，引用时以 template_set 为准。",
+    "research_taxonomy_v21 的金标是构造标签（authorship contrast），没有独立标签预言机；审计只验证模板 round-trip 与 option 映射，不验证真实论文归属。",
+    "banking77 上游增广：75 行金标被改写为 none（gold_removed_none_correct），72 行以 none 作错误干扰项（none_incorrect）；逐行标记在 provenance.augmentation；semantic_label_sets.banking77 含 none 共 78 类，none 非数据集原生类别。",
+    "dev2 的 research_taxonomy_v21 覆盖 7/24 个 topic（agent-benchmarks, data-curation, image-generation, model-architecture, reasoning-methods, search-agents, video-generation）；做 dev2 诊断时须注意其余 topic 形态未在 dev2 出现。",
+    "boolq test2 位置诊断：A 0.572（n=332，期望 0.500，Δ=7.229pp，z=2.634，p=0.00843；z/p 只对应 test2 的 190/332）。恒答 A 基线 accuracy 0.572（Δ=7.229pp，family SE=2.719pp）。三切分合并 A=287/508=56.5%（合并口径，不与 test2 的 z 混读）。只报告，S1 不得据此调阈值/温度/选 seed。",
+    "routing_v2 longest_description 的预测恒为 ['unknown']（Δ=13.333pp）；这是上游固定选项描述造成的 class prior，不是 S0 采样伪影；family SE=0 系结构退化（族内残差全同），不是统计估计。shortcut gate 用聚合值；S1 报告限制节须披露该 source-level 先验并给出捷径基线 accuracy。",
+    "research_taxonomy_v21 的 variant 0 保持上游 canonical 选项顺序（test2 106/424 行，占 2.8%），答案位置由 topic 在 24 项中的规范序号决定；S1 位置偏好分析须单列 variant 0。",
+    "本 manifest 含 test2 金标字母分布；S1 读数期间不得据此调整任何阈值、温度拟合口径或 seed 选择。",
+    "近重复未做：只做精确 statehash 与登记 family 检查；理由见 plan/009 §3.3。",
+    "exam 无 group_id：family 检查对 exam 为 vacuous，由 statehash 覆盖并披露。"
+  ],
+  "rng_protocol": {
+    "protocol": "①：在 get_peft_model 前显式 torch.manual_seed(seed)（控制 LoRA 初始化）；SFTConfig(seed=seed) 经 Trainer.__init__ 的 set_seed(args.seed) 控制数据顺序；不额外调用 torch.cuda.manual_seed——torch.manual_seed 的 CUDA 部分会被训练前的 set_seed 统一重置（random/numpy/torch/cuda）。",
+    "evaluation_seed": "rejev-eval2-20261017-1",
+    "training_seeds": [
+      42,
+      17,
+      29,
+      41
+    ],
+    "set_seed_timing": "已于 2026-10-18 逐行核实（R5 P2-1 关闭）：transformers 5.6.2 `transformers/trainer.py:402` 在 Trainer.__init__ 调 set_seed(args.seed)；`trainer_utils.py:180-194` 重置 random/numpy/torch/cuda。S1 入口按此实现，见 009-s1-manifest.json 的 rng/set_seed 字段。",
+    "note": "S0 只锁定协议文本与 seed 集合；S1 入口 multiseed_train.py 必须按此实现，并在 manifest 中记录实际实现。"
+  },
+  "thresholds": {
+    "run_health": {
+      "execution_or_protocol_failure": "NaN/OOM/超时/数据或模板错配：可续跑或重试，完整记录",
+      "complete_but_poor": "完整执行但表现差：属于研究结果，进主统计与失效计数，不重训、不剔除",
+      "first_complete_run": "不得替换；重训单列登记",
+      "retry_cap": "S1 全程最多 1 次完整重训，且仅当实际已花＋预计 ≤ $30；否则停",
+      "loss_window": "末 50 步滑动均值（2026-10-18 更正：exp006 的 0.4486 是 Trainer 累计均值，不是末 50 步；S1 另用 per-step 贡献量按步求和后取真末 50 步，两者不可直接比）。"
+    },
+    "stability": {
+      "positive_direction": "四臂相对 base-C0 的主指标差值均为正；0 视为未通过",
+      "consistency": "报 seed 间 SD 与配对区间；本轮不另设 SD 阈值、不设实用改善界",
+      "no_best_seed": "终评不挑最佳 seed；报告全部运行、每 seed 成绩、均值与 SD"
+    },
+    "uncertainty": {
+      "seed_df": 3,
+      "sd_95_interval_factor": [
+        0.57,
+        3.73
+      ],
+      "clustering": "按 family 聚类；训练间差异与样本抽样不确定性分开报，不合成一个区间"
+    },
+    "s1_precondition": "本 manifest 的 thresholds 与 rng_protocol 在 S1 开训前复核后生效；未锁定前不得启动训练。",
+    "loss_window": "末 50 步滑动均值（2026-10-18 更正：exp006 的 0.4486 是 Trainer 累计均值，不是末 50 步；S1 另用 S1Trainer 的 per-step 贡献量求和后取真末 50 步，两者不可直接比）。"
+  },
+  "error_analysis_protocol": {
+    "unit": "family",
+    "denominator": "test2 全部 family；逐臂报告 error families / total families",
+    "denominator_n_test2_families": 1659,
+    "denominator_note": "1659 = 440 多行族 + 1219 公开单行族（test2 内）",
+    "type_order": [
+      "状态解析失败",
+      "选项顺序敏感",
+      "恒常策略",
+      "标签错误",
+      "其他"
+    ],
+    "definitions": {
+      "状态解析失败": "候选评分无有效选项 mask，或渲染/解析失败（正常应为 0）",
+      "选项顺序敏感": "该 family 在 §3.6 置换检查中至少一个 sibling 的语义预测发生翻转",
+      "恒常策略": "合成 family：该臂在同一语义 key 上的预测数达到该源 family 规模阈值（policy 3/3；policy_v2/routing_v2 ≥5/6；research_taxonomy_v21 ≥7/8），且该 family 至少一行是错例。公开单行 family：在 test2 内该 source×选项数格子（≥20 行）中，该 family 的预测=格子众数、格子众数占比 ≥0.90、且该 family 是错例；S1 计算众数时把该 family 自身排除。",
+      "标签错误": "预测为有效选项、语义 key ≠ gold，且不满足上述更高优先级类型",
+      "其他": "无法归入上述类型或数据缺失"
+    },
+    "assignment": "按 type_order 优先级单标签归类",
+    "case_sampling": "每类按 group_id 升序取前 10 个 error family；每个 family 取 id 最小的一行作代表案例；全部结果冻结后抽取",
+    "note": "共同错误与臂间分歧错误分列计数；base-C0 / hist 独错 family 入池并单列归属。",
+    "frozen_at": "2026-10-18",
+    "revision": 3,
+    "revision_note": "v3 按 R2 评审：公开源格子限定 test2 内、S1 众数排除自身；锁定 test2 family 分母。"
+  },
+  "permutation_protocol": {
+    "variant_rule": "对每个 test2 record 做一次确定性循环移位：shift = 1 + (int(sha256(id.encode('utf-8')),16) mod (n_options-1))；保留语义 key 与 description，按新顺序重标 A..；原记录与变体同题配对",
+    "metric": "按语义 key 还原后的预测一致率、翻转率、按 family 聚类的 95% 区间",
+    "consistency_definition": "原始记录与变体的预测语义 key 相同 = 一致",
+    "labels": {
+      "high_sensitivity": "翻转率点估计 ≥ 0.20",
+      "low_sensitivity": "一致率 ≥ 0.95 且 family-clustered 95% 区间下界 ≥ 0.90",
+      "otherwise": "不确定"
+    },
+    "claim_limit": "只主张对选项顺序扰动的敏感性；不主张决策由语义内容决定。"
+  },
+  "interval_protocol": {
+    "family_clustered_bootstrap": "按 group_id 有放回重采样 10,000 次，取 2.5/97.5 百分位",
+    "bootstrap_seed": 20261018,
+    "paired": "同题配对差值在每次重采样内重算",
+    "seed_variance": "4 臂均值与样本 SD（3 自由度）；真实 SD 的 95% 区间约观测 SD 的 0.57–3.73 倍",
+    "separation": "训练间差异与样本抽样不确定性分开报，不合成一个区间"
+  },
+  "files": {
+    "records/dev2.jsonl": {
+      "sha256": "1a59a3138dd87573f2abf4ea8d1df1190b93d7a2383bc054cad2120f8bdfc152",
+      "rows": 500
+    },
+    "records/calibration2.jsonl": {
+      "sha256": "2c62e5f15a160330ee7a11410021543b373a7bf0c39f52f2c6aa31940b42f9fd",
+      "rows": 1500
+    },
+    "records/test2.jsonl": {
+      "sha256": "1d59fa224dc28fb60139d91c332123e6650b4b1bcf5a50909f657489f361d9e5",
+      "rows": 3800
+    }
+  }
+}
