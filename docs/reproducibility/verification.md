@@ -43,3 +43,12 @@
 ## 公开同步补记（2026-10-22）
 
 v1.2.1 公开集已 push 到 GitHub `main`（117 文件；只 push main，无 tag/Release/DOI）。上文 2026-10-12 的交付补记保留原样。
+
+## v1.2.2 发布（2026-10-22）
+
+#149 论文/报告修订（30 条 P2）在干净树导出的公开集 **117 文件**，内容审计 **PASS**
+（122 处替换 / 111 条规则），`verify-repro-path.py` **PASS**，`check-manifests` 全绿，
+`run-all.sh` **CHAIN-CHECK: PASS**；`test_audit_public` 160 OK、`test_verify_repro_path` 29 OK。
+论文 EN 37 页 / ZH 31 页。
+
+公开集已 push 到 GitHub `main`，并以轻量 tag `v1.2.2` 发布（不建 Release、不产生 DOI）。
